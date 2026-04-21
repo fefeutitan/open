@@ -1,28 +1,30 @@
-# Análise pendências do projeto Open (2026-04-20)
+# Anï¿½lise pendï¿½ncias do projeto Open (2026-04-20)
 
 ## Bloqueadores
-- Build não compila no ambiente atual porque o Maven está usando Java 8, enquanto o projeto usa `record` e Spring Boot 4.
-- Ação pendente: ajustar `JAVA_HOME` para JDK compatível (mínimo 17, ideal alinhado ao Boot 4).
+- Build nï¿½o compila no ambiente atual porque o Maven estï¿½ usando Java 8, enquanto o projeto usa `record` e Spring Boot 4.
+- Aï¿½ï¿½o pendente: ajustar `JAVA_HOME` para JDK compatï¿½vel (mï¿½nimo 17, ideal alinhado ao Boot 4).
 
-## Regras de negócio ainda faltando
-- Fluxo de súmula com 3 juízes ainda não implementado de ponta a ponta (domínio existe, mas faltam serviço/endpoints/repositórios específicos de operação).
-- Empate não está modelado no fluxo atual:
-  - README prevê 1 ponto para empate na fase de grupos.
-  - README prevê 3º jogo automático no mata-mata quando houver empate.
-  - Implementação atual exige vencedor sempre e só pontua vitória (3 pontos).
+- ObservaÃ§Ã£o no dia seguinte dessa interaÃ§Ã£o eu mudei o ambiente pro java 21 java -version mvn -version
+
+## Regras de negï¿½cio ainda faltando
+- Fluxo de sï¿½mula com 3 juï¿½zes ainda nï¿½o implementado de ponta a ponta (domï¿½nio existe, mas faltam serviï¿½o/endpoints/repositï¿½rios especï¿½ficos de operaï¿½ï¿½o).
+- Empate nï¿½o estï¿½ modelado no fluxo atual:
+  - README prevï¿½ 1 ponto para empate na fase de grupos.
+  - README prevï¿½ 3ï¿½ jogo automï¿½tico no mata-mata quando houver empate.
+  - Implementaï¿½ï¿½o atual exige vencedor sempre e sï¿½ pontua vitï¿½ria (3 pontos).
 
 ## Qualidade e cobertura
-- Testes ainda limitados (contexto + 1 cenário principal de competição).
-- Faltam testes para empate, critérios de desempate, validações e fluxo de súmula.
+- Testes ainda limitados (contexto + 1 cenï¿½rio principal de competiï¿½ï¿½o).
+- Faltam testes para empate, critï¿½rios de desempate, validaï¿½ï¿½es e fluxo de sï¿½mula.
 
-## Produção e operação
-- Configuração atual usa H2 em memória e `ddl-auto=update`.
-- Faltam perfil de produção (Postgres), migração de schema e ajustes de deploy.
-- API cobre cadastro/listagem e parte da competição, mas faltam endpoints de ciclo de vida completo (status, edição/correção completa, operação de súmula).
+## Produï¿½ï¿½o e operaï¿½ï¿½o
+- Configuraï¿½ï¿½o atual usa H2 em memï¿½ria e `ddl-auto=update`.
+- Faltam perfil de produï¿½ï¿½o (Postgres), migraï¿½ï¿½o de schema e ajustes de deploy.
+- API cobre cadastro/listagem e parte da competiï¿½ï¿½o, mas faltam endpoints de ciclo de vida completo (status, ediï¿½ï¿½o/correï¿½ï¿½o completa, operaï¿½ï¿½o de sï¿½mula).
 
-## Próxima retomada sugerida
+## Prï¿½xima retomada sugerida
 1. Corrigir ambiente Java e validar `mvnw test`.
-2. Implementar regra de empate (grupos + mata-mata com 3º jogo).
-3. Implementar fluxo completo de súmula com 3 juízes.
+2. Implementar regra de empate (grupos + mata-mata com 3ï¿½ jogo).
+3. Implementar fluxo completo de sï¿½mula com 3 juï¿½zes.
 4. Ampliar testes automatizados.
-5. Preparar configuração de produção.
+5. Preparar configuraï¿½ï¿½o de produï¿½ï¿½o.
