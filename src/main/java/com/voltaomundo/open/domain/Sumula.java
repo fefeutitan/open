@@ -41,4 +41,12 @@ public class Sumula extends BaseEntity {
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
     }
+
+    public List<AvaliacaoJuiz> getAvaliacoes() {
+        return avaliacoes;
+    }
+
+    public void setAvaliacoes(List<AvaliacaoJuiz> avaliacoes) {
+        this.avaliacoes = avaliacoes;
+    }
 }

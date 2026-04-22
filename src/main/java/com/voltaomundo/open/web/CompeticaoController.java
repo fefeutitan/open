@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,12 +20,15 @@ import com.voltaomundo.open.repository.FaseRepository;
 import com.voltaomundo.open.repository.GrupoRepository;
 import com.voltaomundo.open.repository.JogoRepository;
 import com.voltaomundo.open.service.CompeticaoService;
+import com.voltaomundo.open.service.SumulaService;
 import com.voltaomundo.open.web.dto.ClassificacaoAtletaDto;
 import com.voltaomundo.open.web.dto.FaseRequest;
 import com.voltaomundo.open.web.dto.GeracaoMataMataRequest;
 import com.voltaomundo.open.web.dto.GrupoRequest;
 import com.voltaomundo.open.web.dto.JogoRequest;
 import com.voltaomundo.open.web.dto.ResultadoJogoRequest;
+import com.voltaomundo.open.web.dto.SumulaJogoRequest;
+import com.voltaomundo.open.web.dto.SumulaJogoResponse;
 
 import jakarta.validation.Valid;
 
@@ -37,15 +41,18 @@ public class CompeticaoController {
     private final GrupoRepository grupoRepository;
     private final JogoRepository jogoRepository;
     private final CompeticaoService competicaoService;
+    private final SumulaService sumulaService;
 
     public CompeticaoController(FaseRepository faseRepository,
             GrupoRepository grupoRepository,
             JogoRepository jogoRepository,
-            CompeticaoService competicaoService) {
+            CompeticaoService competicaoService,
+            SumulaService sumulaService) {
         this.faseRepository = faseRepository;
         this.grupoRepository = grupoRepository;
         this.jogoRepository = jogoRepository;
         this.competicaoService = competicaoService;
+        this.sumulaService = sumulaService;
     }
 
     @GetMapping("/fases")
@@ -86,6 +93,16 @@ public class CompeticaoController {
     @PatchMapping("/jogos/{jogoId}/resultado")
     public Jogo registrarResultado(@PathVariable Long jogoId, @Valid @RequestBody ResultadoJogoRequest request) {
         return competicaoService.registrarResultado(jogoId, request);
+    }
+
+    @PutMapping("/jogos/{jogoId}/sumula")
+    public SumulaJogoResponse registrarSumula(@PathVariable Long jogoId, @Valid @RequestBody SumulaJogoRequest request) {
+        return sumulaService.registrar(jogoId, request);
+    }
+
+    @GetMapping("/jogos/{jogoId}/sumula")
+    public SumulaJogoResponse buscarSumula(@PathVariable Long jogoId) {
+        return sumulaService.buscarPorJogo(jogoId);
     }
 
     @PostMapping("/fases/{faseGruposId}/gerar-mata-mata")

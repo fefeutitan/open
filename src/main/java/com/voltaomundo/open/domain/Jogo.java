@@ -123,4 +123,12 @@ public class Jogo extends BaseEntity {
     public void setPontosAzul(Integer pontosAzul) {
         this.pontosAzul = pontosAzul;
     }
+
+    public Sumula getSumula() {
+        return sumula;
+    }
+
+    public void setSumula(Sumula sumula) {
+        this.sumula = sumula;
+    }
 }
