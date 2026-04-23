@@ -71,13 +71,21 @@ public class CompeticaoService {
         return jogoRepository.save(jogo);
     }
 
+    @Transactional
     public Jogo registrarResultado(Long jogoId, ResultadoJogoRequest request) {
         Jogo jogo = lookupService.jogo(jogoId);
+        validarResultadoPorTipoFase(jogo, request);
         jogo.setPontosVermelho(request.pontosVermelho());
         jogo.setPontosAzul(request.pontosAzul());
         jogo.setVencedor(request.vencedor());
         jogo.setStatus(StatusJogo.FINALIZADO);
-        return jogoRepository.save(jogo);
+        Jogo jogoSalvo = jogoRepository.save(jogo);
+
+        if (deveCriarJogoDesempate(jogoSalvo)) {
+            criarJogoDesempateSeNecessario(jogoSalvo);
+        }
+
+        return jogoSalvo;
     }
 
     @Transactional(readOnly = true)
@@ -147,7 +155,7 @@ public class CompeticaoService {
             registrarParticipante(estatisticas, jogo.getAtletaVermelho());
             registrarParticipante(estatisticas, jogo.getAtletaAzul());
 
-            if (jogo.getStatus() != StatusJogo.FINALIZADO || jogo.getVencedor() == null
+            if (jogo.getStatus() != StatusJogo.FINALIZADO
                     || jogo.getPontosVermelho() == null || jogo.getPontosAzul() == null) {
                 continue;
             }
@@ -162,7 +170,10 @@ public class CompeticaoService {
             azul.pontosMarcados += jogo.getPontosAzul();
             azul.pontosSofridos += jogo.getPontosVermelho();
 
-            if (jogo.getVencedor() == LadoCompetidor.VERMELHO) {
+            if (jogo.getVencedor() == null) {
+                vermelho.pontosClassificacao += 1;
+                azul.pontosClassificacao += 1;
+            } else if (jogo.getVencedor() == LadoCompetidor.VERMELHO) {
                 vermelho.vitorias++;
                 vermelho.pontosClassificacao += 3;
                 azul.derrotas++;
@@ -201,6 +212,66 @@ public class CompeticaoService {
 
     private void registrarParticipante(Map<Long, EstatisticaAtleta> estatisticas, Atleta atleta) {
         estatisticas.computeIfAbsent(atleta.getId(), id -> new EstatisticaAtleta(atleta.getId(), atleta.getNome()));
+    }
+
+    private void validarResultadoPorTipoFase(Jogo jogo, ResultadoJogoRequest request) {
+        boolean empate = request.pontosVermelho().equals(request.pontosAzul());
+
+        if (empate) {
+            if (request.vencedor() != null) {
+                throw new IllegalArgumentException("Resultado empatado nao pode informar vencedor.");
+            }
+            return;
+        }
+
+        if (request.vencedor() == null) {
+            throw new IllegalArgumentException("Resultado com pontuacao diferente precisa informar vencedor.");
+        }
+
+        if (request.pontosVermelho() > request.pontosAzul() && request.vencedor() != LadoCompetidor.VERMELHO) {
+            throw new IllegalArgumentException("Vencedor informado nao confere com a pontuacao.");
+        }
+        if (request.pontosAzul() > request.pontosVermelho() && request.vencedor() != LadoCompetidor.AZUL) {
+            throw new IllegalArgumentException("Vencedor informado nao confere com a pontuacao.");
+        }
+    }
+
+    private boolean deveCriarJogoDesempate(Jogo jogo) {
+        return jogo.getFase().getTipo() == TipoFase.ELIMINATORIA
+                && jogo.getPontosVermelho() != null
+                && jogo.getPontosAzul() != null
+                && jogo.getPontosVermelho().equals(jogo.getPontosAzul());
+    }
+
+    private void criarJogoDesempateSeNecessario(Jogo jogoEmpatado) {
+        boolean jaExiste = jogoRepository.findByFaseId(jogoEmpatado.getFase().getId())
+                .stream()
+                .anyMatch(jogo -> jogo.getStatus() == StatusJogo.AGENDADO
+                        && jogo.getPontosVermelho() == null
+                        && jogo.getPontosAzul() == null
+                        && jogo.getVencedor() == null
+                        && mesmosAtletas(jogoEmpatado, jogo));
+
+        if (jaExiste) {
+            return;
+        }
+
+        Jogo desempate = new Jogo();
+        desempate.setFase(jogoEmpatado.getFase());
+        desempate.setCategoria(jogoEmpatado.getCategoria());
+        desempate.setAtletaVermelho(jogoEmpatado.getAtletaVermelho());
+        desempate.setAtletaAzul(jogoEmpatado.getAtletaAzul());
+        jogoRepository.save(desempate);
+    }
+
+    private boolean mesmosAtletas(Jogo base, Jogo candidato) {
+        Long baseVermelhoId = base.getAtletaVermelho().getId();
+        Long baseAzulId = base.getAtletaAzul().getId();
+        Long candidatoVermelhoId = candidato.getAtletaVermelho().getId();
+        Long candidatoAzulId = candidato.getAtletaAzul().getId();
+
+        return (baseVermelhoId.equals(candidatoVermelhoId) && baseAzulId.equals(candidatoAzulId))
+                || (baseVermelhoId.equals(candidatoAzulId) && baseAzulId.equals(candidatoVermelhoId));
     }
 
     private static final class EstatisticaAtleta {
