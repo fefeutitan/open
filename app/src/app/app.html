@@ -1,0 +1,68 @@
+<main class="app-shell">
+  <aside class="sidebar" aria-label="Navegacao principal">
+    <div class="brand">
+      <span class="brand-mark">OV</span>
+      <div>
+        <strong>Open VM</strong>
+        <span>Competicao</span>
+      </div>
+    </div>
+
+    <nav class="nav-list">
+      <a class="active" href="#">Painel</a>
+      <a href="#">Campeonatos</a>
+      <a href="#">Atletas</a>
+      <a href="#">Jogos</a>
+      <a href="#">Sumulas</a>
+    </nav>
+  </aside>
+
+  <section class="workspace">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Operacao do campeonato</p>
+        <h1>Painel do Open Volta ao Mundo</h1>
+      </div>
+      <button type="button">Novo jogo</button>
+    </header>
+
+    <section class="metrics" aria-label="Resumo operacional">
+      <article>
+        <span>Jogos hoje</span>
+        <strong>0</strong>
+      </article>
+      <article>
+        <span>Em andamento</span>
+        <strong>0</strong>
+      </article>
+      <article>
+        <span>Desempates pendentes</span>
+        <strong>0</strong>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Fila de jogos</h2>
+          <span>API /api/competicao/jogos</span>
+        </div>
+        <div class="empty-state">
+          <strong>Nenhum jogo carregado</strong>
+          <p>A proxima etapa e conectar esta tela aos endpoints do backend.</p>
+        </div>
+      </article>
+
+      <article class="panel compact">
+        <div class="panel-header">
+          <h2>Acoes rapidas</h2>
+        </div>
+        <button type="button">Iniciar jogo</button>
+        <button type="button">Registrar sumula</button>
+        <button type="button">Corrigir resultado</button>
+      </article>
+    </section>
+
+    <router-outlet />
+  </section>
+</main>
