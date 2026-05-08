@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.voltaomundo.open.domain.Atleta;
 import com.voltaomundo.open.domain.Campeonato;
 import com.voltaomundo.open.domain.Categoria;
+import com.voltaomundo.open.domain.CorrecaoJogo;
 import com.voltaomundo.open.domain.Fase;
 import com.voltaomundo.open.domain.GeneroCategoria;
 import com.voltaomundo.open.domain.Jogo;
@@ -22,9 +23,11 @@ import com.voltaomundo.open.domain.StatusAtleta;
 import com.voltaomundo.open.domain.StatusCampeonato;
 import com.voltaomundo.open.domain.StatusJogo;
 import com.voltaomundo.open.domain.TipoFase;
+import com.voltaomundo.open.domain.TipoCorrecaoJogo;
 import com.voltaomundo.open.repository.AtletaRepository;
 import com.voltaomundo.open.repository.CampeonatoRepository;
 import com.voltaomundo.open.repository.CategoriaRepository;
+import com.voltaomundo.open.repository.CorrecaoJogoRepository;
 import com.voltaomundo.open.repository.FaseRepository;
 import com.voltaomundo.open.repository.JogoRepository;
 import com.voltaomundo.open.repository.JuizRepository;
@@ -60,6 +63,9 @@ class SumulaServiceTests {
 
     @Autowired
     private JuizRepository juizRepository;
+
+    @Autowired
+    private CorrecaoJogoRepository correcaoJogoRepository;
 
     @Test
     void deveRegistrarSumulaComTresJuizesEFinalizarJogo() {
@@ -99,6 +105,53 @@ class SumulaServiceTests {
                 .hasMessageContaining("juiz diferente");
     }
 
+    @Test
+    void deveRejeitarSumulaForaDeJogoEmAndamento() {
+        ContextoBase contexto = criarContextoBase();
+        contexto.jogo().setStatus(StatusJogo.AGENDADO);
+        jogoRepository.save(contexto.jogo());
+
+        assertThatThrownBy(() -> sumulaService.registrar(contexto.jogo().getId(), new SumulaJogoRequest(
+                "Tentativa invalida",
+                List.of(
+                        new AvaliacaoJuizRequest(contexto.juiz1().getId(), 10, 8, null),
+                        new AvaliacaoJuizRequest(contexto.juiz2().getId(), 9, 10, null),
+                        new AvaliacaoJuizRequest(contexto.juiz3().getId(), 10, 9, null)))))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("em andamento");
+    }
+
+    @Test
+    void deveCorrigirSumulaFinalizadaComAuditoria() {
+        ContextoBase contexto = criarContextoBase();
+        sumulaService.registrar(contexto.jogo().getId(), new SumulaJogoRequest(
+                "Resultado original",
+                List.of(
+                        new AvaliacaoJuizRequest(contexto.juiz1().getId(), 10, 8, null),
+                        new AvaliacaoJuizRequest(contexto.juiz2().getId(), 10, 9, null),
+                        new AvaliacaoJuizRequest(contexto.juiz3().getId(), 9, 10, null))));
+
+        CorrecaoJogo correcao = sumulaService.corrigir(contexto.jogo().getId(), "Juiz 2 informou cartao errado",
+                new SumulaJogoRequest(
+                        "Resultado corrigido",
+                        List.of(
+                                new AvaliacaoJuizRequest(contexto.juiz1().getId(), 10, 8, null),
+                                new AvaliacaoJuizRequest(contexto.juiz2().getId(), 8, 10, null),
+                                new AvaliacaoJuizRequest(contexto.juiz3().getId(), 9, 10, null))));
+
+        Jogo jogoAtualizado = jogoRepository.findById(contexto.jogo().getId()).orElseThrow();
+        assertThat(jogoAtualizado.getStatus()).isEqualTo(StatusJogo.FINALIZADO);
+        assertThat(jogoAtualizado.getVencedor()).isEqualTo(LadoCompetidor.AZUL);
+        assertThat(jogoAtualizado.getPontosVermelho()).isEqualTo(27);
+        assertThat(jogoAtualizado.getPontosAzul()).isEqualTo(28);
+
+        assertThat(correcao.getTipo()).isEqualTo(TipoCorrecaoJogo.SUMULA);
+        assertThat(correcao.getMotivo()).contains("Juiz 2");
+        assertThat(correcao.getDetalheAnterior()).contains("Resultado original");
+        assertThat(correcao.getDetalheNovo()).contains("Resultado corrigido");
+        assertThat(correcaoJogoRepository.findByJogoIdOrderByCriadoEmAsc(contexto.jogo().getId())).hasSize(1);
+    }
+
     private ContextoBase criarContextoBase() {
         Campeonato campeonato = new Campeonato();
         campeonato.setNome("Open VM");
@@ -132,6 +185,7 @@ class SumulaServiceTests {
         jogo.setCategoria(categoria);
         jogo.setAtletaVermelho(atletaVermelho);
         jogo.setAtletaAzul(atletaAzul);
+        jogo.setStatus(StatusJogo.EM_ANDAMENTO);
         jogo = jogoRepository.save(jogo);
 
         Juiz juiz1 = juiz("Juiz 1", "J1", campeonato);

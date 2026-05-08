@@ -10,12 +10,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.voltaomundo.open.domain.Atleta;
+import com.voltaomundo.open.domain.CorrecaoJogo;
 import com.voltaomundo.open.domain.Fase;
 import com.voltaomundo.open.domain.Grupo;
 import com.voltaomundo.open.domain.Jogo;
 import com.voltaomundo.open.domain.LadoCompetidor;
 import com.voltaomundo.open.domain.StatusJogo;
+import com.voltaomundo.open.domain.TipoCorrecaoJogo;
 import com.voltaomundo.open.domain.TipoFase;
+import com.voltaomundo.open.repository.CorrecaoJogoRepository;
 import com.voltaomundo.open.repository.FaseRepository;
 import com.voltaomundo.open.repository.GrupoRepository;
 import com.voltaomundo.open.repository.JogoRepository;
@@ -31,15 +34,18 @@ public class CompeticaoService {
     private final FaseRepository faseRepository;
     private final GrupoRepository grupoRepository;
     private final JogoRepository jogoRepository;
+    private final CorrecaoJogoRepository correcaoJogoRepository;
     private final EntityLookupService lookupService;
 
     public CompeticaoService(FaseRepository faseRepository,
             GrupoRepository grupoRepository,
             JogoRepository jogoRepository,
+            CorrecaoJogoRepository correcaoJogoRepository,
             EntityLookupService lookupService) {
         this.faseRepository = faseRepository;
         this.grupoRepository = grupoRepository;
         this.jogoRepository = jogoRepository;
+        this.correcaoJogoRepository = correcaoJogoRepository;
         this.lookupService = lookupService;
     }
 
@@ -72,8 +78,21 @@ public class CompeticaoService {
     }
 
     @Transactional
+    public Jogo iniciarJogo(Long jogoId) {
+        Jogo jogo = lookupService.jogo(jogoId);
+        if (jogo.getStatus() != StatusJogo.AGENDADO) {
+            throw new IllegalArgumentException("Somente jogos agendados podem ser iniciados.");
+        }
+        jogo.setStatus(StatusJogo.EM_ANDAMENTO);
+        return jogoRepository.save(jogo);
+    }
+
+    @Transactional
     public Jogo registrarResultado(Long jogoId, ResultadoJogoRequest request) {
         Jogo jogo = lookupService.jogo(jogoId);
+        if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
+            throw new IllegalArgumentException("Resultado so pode ser registrado para jogo em andamento.");
+        }
         validarResultadoPorTipoFase(jogo, request);
         jogo.setPontosVermelho(request.pontosVermelho());
         jogo.setPontosAzul(request.pontosAzul());
@@ -86,6 +105,33 @@ public class CompeticaoService {
         }
 
         return jogoSalvo;
+    }
+
+    @Transactional
+    public CorrecaoJogo corrigirResultado(Long jogoId, String motivo, ResultadoJogoRequest request) {
+        Jogo jogo = lookupService.jogo(jogoId);
+        if (jogo.getStatus() != StatusJogo.FINALIZADO) {
+            throw new IllegalArgumentException("Somente jogos finalizados podem ser corrigidos.");
+        }
+
+        validarResultadoPorTipoFase(jogo, request);
+        String detalheAnterior = detalheResultado(jogo);
+
+        jogo.setPontosVermelho(request.pontosVermelho());
+        jogo.setPontosAzul(request.pontosAzul());
+        jogo.setVencedor(request.vencedor());
+        Jogo jogoSalvo = jogoRepository.save(jogo);
+        if (deveCriarJogoDesempate(jogoSalvo)) {
+            criarJogoDesempateSeNecessario(jogoSalvo);
+        }
+
+        CorrecaoJogo correcao = new CorrecaoJogo();
+        correcao.setJogo(jogoSalvo);
+        correcao.setTipo(TipoCorrecaoJogo.RESULTADO);
+        correcao.setMotivo(motivo);
+        correcao.setDetalheAnterior(detalheAnterior);
+        correcao.setDetalheNovo(detalheResultado(jogoSalvo));
+        return correcaoJogoRepository.save(correcao);
     }
 
     @Transactional(readOnly = true)
@@ -241,6 +287,13 @@ public class CompeticaoService {
                 && jogo.getPontosVermelho() != null
                 && jogo.getPontosAzul() != null
                 && jogo.getPontosVermelho().equals(jogo.getPontosAzul());
+    }
+
+    private String detalheResultado(Jogo jogo) {
+        return "pontosVermelho=" + jogo.getPontosVermelho()
+                + "; pontosAzul=" + jogo.getPontosAzul()
+                + "; vencedor=" + jogo.getVencedor()
+                + "; status=" + jogo.getStatus();
     }
 
     private void criarJogoDesempateSeNecessario(Jogo jogoEmpatado) {

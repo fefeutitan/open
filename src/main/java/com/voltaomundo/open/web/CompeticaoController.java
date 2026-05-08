@@ -22,6 +22,9 @@ import com.voltaomundo.open.repository.JogoRepository;
 import com.voltaomundo.open.service.CompeticaoService;
 import com.voltaomundo.open.service.SumulaService;
 import com.voltaomundo.open.web.dto.ClassificacaoAtletaDto;
+import com.voltaomundo.open.web.dto.CorrecaoJogoResponse;
+import com.voltaomundo.open.web.dto.CorrecaoResultadoJogoRequest;
+import com.voltaomundo.open.web.dto.CorrecaoSumulaJogoRequest;
 import com.voltaomundo.open.web.dto.FaseRequest;
 import com.voltaomundo.open.web.dto.GeracaoMataMataRequest;
 import com.voltaomundo.open.web.dto.GrupoRequest;
@@ -90,14 +93,32 @@ public class CompeticaoController {
         return competicaoService.criarJogo(request);
     }
 
+    @PatchMapping("/jogos/{jogoId}/iniciar")
+    public Jogo iniciarJogo(@PathVariable Long jogoId) {
+        return competicaoService.iniciarJogo(jogoId);
+    }
+
     @PatchMapping("/jogos/{jogoId}/resultado")
     public Jogo registrarResultado(@PathVariable Long jogoId, @Valid @RequestBody ResultadoJogoRequest request) {
         return competicaoService.registrarResultado(jogoId, request);
     }
 
+    @PostMapping("/jogos/{jogoId}/correcoes/resultado")
+    public CorrecaoJogoResponse corrigirResultado(@PathVariable Long jogoId,
+            @Valid @RequestBody CorrecaoResultadoJogoRequest request) {
+        return CorrecaoJogoResponse.from(
+                competicaoService.corrigirResultado(jogoId, request.motivo(), request.resultado()));
+    }
+
     @PutMapping("/jogos/{jogoId}/sumula")
     public SumulaJogoResponse registrarSumula(@PathVariable Long jogoId, @Valid @RequestBody SumulaJogoRequest request) {
         return sumulaService.registrar(jogoId, request);
+    }
+
+    @PostMapping("/jogos/{jogoId}/correcoes/sumula")
+    public CorrecaoJogoResponse corrigirSumula(@PathVariable Long jogoId,
+            @Valid @RequestBody CorrecaoSumulaJogoRequest request) {
+        return CorrecaoJogoResponse.from(sumulaService.corrigir(jogoId, request.motivo(), request.sumula()));
     }
 
     @GetMapping("/jogos/{jogoId}/sumula")

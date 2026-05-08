@@ -9,12 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.voltaomundo.open.domain.AvaliacaoJuiz;
+import com.voltaomundo.open.domain.CorrecaoJogo;
 import com.voltaomundo.open.domain.Jogo;
 import com.voltaomundo.open.domain.Juiz;
 import com.voltaomundo.open.domain.LadoCompetidor;
 import com.voltaomundo.open.domain.StatusJogo;
 import com.voltaomundo.open.domain.Sumula;
+import com.voltaomundo.open.domain.TipoCorrecaoJogo;
 import com.voltaomundo.open.repository.AvaliacaoJuizRepository;
+import com.voltaomundo.open.repository.CorrecaoJogoRepository;
 import com.voltaomundo.open.repository.JogoRepository;
 import com.voltaomundo.open.repository.SumulaRepository;
 import com.voltaomundo.open.web.dto.AvaliacaoJuizDto;
@@ -29,15 +32,18 @@ public class SumulaService {
     private final SumulaRepository sumulaRepository;
     private final AvaliacaoJuizRepository avaliacaoJuizRepository;
     private final JogoRepository jogoRepository;
+    private final CorrecaoJogoRepository correcaoJogoRepository;
 
     public SumulaService(EntityLookupService lookupService,
             SumulaRepository sumulaRepository,
             AvaliacaoJuizRepository avaliacaoJuizRepository,
-            JogoRepository jogoRepository) {
+            JogoRepository jogoRepository,
+            CorrecaoJogoRepository correcaoJogoRepository) {
         this.lookupService = lookupService;
         this.sumulaRepository = sumulaRepository;
         this.avaliacaoJuizRepository = avaliacaoJuizRepository;
         this.jogoRepository = jogoRepository;
+        this.correcaoJogoRepository = correcaoJogoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -53,6 +59,33 @@ public class SumulaService {
     @Transactional
     public SumulaJogoResponse registrar(Long jogoId, SumulaJogoRequest request) {
         Jogo jogo = lookupService.jogo(jogoId);
+        if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
+            throw new IllegalArgumentException("Sumula so pode ser registrada para jogo em andamento.");
+        }
+        return registrarAvaliacoes(jogoId, request, jogo);
+    }
+
+    @Transactional
+    public CorrecaoJogo corrigir(Long jogoId, String motivo, SumulaJogoRequest request) {
+        Jogo jogo = lookupService.jogo(jogoId);
+        if (jogo.getStatus() != StatusJogo.FINALIZADO) {
+            throw new IllegalArgumentException("Somente jogos finalizados podem ser corrigidos.");
+        }
+
+        String detalheAnterior = detalheSumula(jogoId, jogo);
+        registrarAvaliacoes(jogoId, request, jogo);
+        String detalheNovo = detalheSumula(jogoId, jogo);
+
+        CorrecaoJogo correcao = new CorrecaoJogo();
+        correcao.setJogo(jogo);
+        correcao.setTipo(TipoCorrecaoJogo.SUMULA);
+        correcao.setMotivo(motivo);
+        correcao.setDetalheAnterior(detalheAnterior);
+        correcao.setDetalheNovo(detalheNovo);
+        return correcaoJogoRepository.save(correcao);
+    }
+
+    private SumulaJogoResponse registrarAvaliacoes(Long jogoId, SumulaJogoRequest request, Jogo jogo) {
         if (request.avaliacoes() == null || request.avaliacoes().size() != 3) {
             throw new IllegalArgumentException("A sumula precisa conter exatamente 3 avaliacoes.");
         }
@@ -120,6 +153,33 @@ public class SumulaService {
         jogoRepository.save(jogo);
 
         return toResponse(sumula, jogo, avaliacoesSalvas);
+    }
+
+    private String detalheSumula(Long jogoId, Jogo jogo) {
+        return sumulaRepository.findByJogoId(jogoId)
+                .map(sumula -> {
+                    List<AvaliacaoJuiz> avaliacoes = avaliacaoJuizRepository.findBySumulaId(sumula.getId());
+                    return "observacoes=" + sumula.getObservacoes()
+                            + "; " + detalheResultado(jogo)
+                            + "; avaliacoes=" + detalheAvaliacoes(avaliacoes);
+                })
+                .orElse(detalheResultado(jogo) + "; sumula=null");
+    }
+
+    private String detalheResultado(Jogo jogo) {
+        return "pontosVermelho=" + jogo.getPontosVermelho()
+                + "; pontosAzul=" + jogo.getPontosAzul()
+                + "; vencedor=" + jogo.getVencedor()
+                + "; status=" + jogo.getStatus();
+    }
+
+    private String detalheAvaliacoes(List<AvaliacaoJuiz> avaliacoes) {
+        return avaliacoes.stream()
+                .map(avaliacao -> "{juizId=" + avaliacao.getJuiz().getId()
+                        + ", pontosVermelho=" + avaliacao.getPontosVermelho()
+                        + ", pontosAzul=" + avaliacao.getPontosAzul() + "}")
+                .toList()
+                .toString();
     }
 
     private SumulaJogoResponse toResponse(Sumula sumula, Jogo jogo, List<AvaliacaoJuiz> avaliacoes) {

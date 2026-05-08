@@ -1,6 +1,7 @@
 package com.voltaomundo.open;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.voltaomundo.open.domain.Atleta;
 import com.voltaomundo.open.domain.Campeonato;
 import com.voltaomundo.open.domain.Categoria;
+import com.voltaomundo.open.domain.CorrecaoJogo;
 import com.voltaomundo.open.domain.Fase;
 import com.voltaomundo.open.domain.GeneroCategoria;
 import com.voltaomundo.open.domain.Grupo;
@@ -20,10 +22,12 @@ import com.voltaomundo.open.domain.Nucleo;
 import com.voltaomundo.open.domain.StatusCampeonato;
 import com.voltaomundo.open.domain.StatusJogo;
 import com.voltaomundo.open.domain.StatusAtleta;
+import com.voltaomundo.open.domain.TipoCorrecaoJogo;
 import com.voltaomundo.open.domain.TipoFase;
 import com.voltaomundo.open.repository.AtletaRepository;
 import com.voltaomundo.open.repository.CampeonatoRepository;
 import com.voltaomundo.open.repository.CategoriaRepository;
+import com.voltaomundo.open.repository.CorrecaoJogoRepository;
 import com.voltaomundo.open.repository.FaseRepository;
 import com.voltaomundo.open.repository.GrupoRepository;
 import com.voltaomundo.open.repository.JogoRepository;
@@ -58,6 +62,9 @@ class CompeticaoServiceTests {
 
     @Autowired
     private JogoRepository jogoRepository;
+
+    @Autowired
+    private CorrecaoJogoRepository correcaoJogoRepository;
 
     @Test
     void deveClassificarGrupoEGerarMataMata() {
@@ -135,8 +142,9 @@ class CompeticaoServiceTests {
         Fase grupos = fase(campeonato, "Grupos", TipoFase.GRUPOS, 1, 2);
         Grupo grupoA = grupo(grupos, "A");
 
-        Jogo empate = jogo(grupos, grupoA, categoria, atleta1, atleta2, 10, 10, null);
+        Jogo empate = jogoAgendado(grupos, grupoA, categoria, atleta1, atleta2);
 
+        competicaoService.iniciarJogo(empate.getId());
         competicaoService.registrarResultado(
                 empate.getId(),
                 new ResultadoJogoRequest(10, 10, null));
@@ -158,11 +166,9 @@ class CompeticaoServiceTests {
         Atleta atleta2 = atleta("Atleta 2", categoria, nucleo);
 
         Fase eliminatoria = fase(campeonato, "Quartas", TipoFase.ELIMINATORIA, 1, null);
-        Jogo jogoEliminatorio = jogo(eliminatoria, null, categoria, atleta1, atleta2, 10, 10, null);
+        Jogo jogoEliminatorio = jogoAgendado(eliminatoria, null, categoria, atleta1, atleta2);
 
-        competicaoService.registrarResultado(
-                jogoEliminatorio.getId(),
-                new ResultadoJogoRequest(10, 10, null));
+        competicaoService.iniciarJogo(jogoEliminatorio.getId());
         competicaoService.registrarResultado(
                 jogoEliminatorio.getId(),
                 new ResultadoJogoRequest(10, 10, null));
@@ -185,6 +191,75 @@ class CompeticaoServiceTests {
                     assertThat(jogo.getAtletaVermelho().getId()).isEqualTo(atleta1.getId());
                     assertThat(jogo.getAtletaAzul().getId()).isEqualTo(atleta2.getId());
                 });
+    }
+
+    @Test
+    void deveIniciarJogoAgendado() {
+        Campeonato campeonato = campeonato("Open VM");
+        Categoria categoria = categoria(campeonato, "Adulto");
+        Nucleo nucleo = nucleo(campeonato, "Nucleo A");
+        Atleta atleta1 = atleta("Atleta 1", categoria, nucleo);
+        Atleta atleta2 = atleta("Atleta 2", categoria, nucleo);
+        Fase eliminatoria = fase(campeonato, "Quartas", TipoFase.ELIMINATORIA, 1, null);
+        Jogo jogo = jogoAgendado(eliminatoria, null, categoria, atleta1, atleta2);
+
+        Jogo iniciado = competicaoService.iniciarJogo(jogo.getId());
+
+        assertThat(iniciado.getStatus()).isEqualTo(StatusJogo.EM_ANDAMENTO);
+    }
+
+    @Test
+    void deveRejeitarResultadoForaDeJogoEmAndamento() {
+        Campeonato campeonato = campeonato("Open VM");
+        Categoria categoria = categoria(campeonato, "Adulto");
+        Nucleo nucleo = nucleo(campeonato, "Nucleo A");
+        Atleta atleta1 = atleta("Atleta 1", categoria, nucleo);
+        Atleta atleta2 = atleta("Atleta 2", categoria, nucleo);
+        Fase eliminatoria = fase(campeonato, "Quartas", TipoFase.ELIMINATORIA, 1, null);
+        Jogo jogo = jogoAgendado(eliminatoria, null, categoria, atleta1, atleta2);
+
+        assertThatThrownBy(() -> competicaoService.registrarResultado(
+                jogo.getId(),
+                new ResultadoJogoRequest(10, 8, LadoCompetidor.VERMELHO)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("em andamento");
+
+        competicaoService.iniciarJogo(jogo.getId());
+        competicaoService.registrarResultado(jogo.getId(), new ResultadoJogoRequest(10, 8, LadoCompetidor.VERMELHO));
+
+        assertThatThrownBy(() -> competicaoService.registrarResultado(
+                jogo.getId(),
+                new ResultadoJogoRequest(10, 8, LadoCompetidor.VERMELHO)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("em andamento");
+    }
+
+    @Test
+    void deveCorrigirResultadoFinalizadoComAuditoria() {
+        Campeonato campeonato = campeonato("Open VM");
+        Categoria categoria = categoria(campeonato, "Adulto");
+        Nucleo nucleo = nucleo(campeonato, "Nucleo A");
+        Atleta atleta1 = atleta("Atleta 1", categoria, nucleo);
+        Atleta atleta2 = atleta("Atleta 2", categoria, nucleo);
+        Fase eliminatoria = fase(campeonato, "Quartas", TipoFase.ELIMINATORIA, 1, null);
+        Jogo jogo = jogo(eliminatoria, null, categoria, atleta1, atleta2, 10, 8, LadoCompetidor.VERMELHO);
+
+        CorrecaoJogo correcao = competicaoService.corrigirResultado(
+                jogo.getId(),
+                "Erro de digitacao na pontuacao",
+                new ResultadoJogoRequest(7, 9, LadoCompetidor.AZUL));
+
+        Jogo jogoAtualizado = jogoRepository.findById(jogo.getId()).orElseThrow();
+        assertThat(jogoAtualizado.getStatus()).isEqualTo(StatusJogo.FINALIZADO);
+        assertThat(jogoAtualizado.getPontosVermelho()).isEqualTo(7);
+        assertThat(jogoAtualizado.getPontosAzul()).isEqualTo(9);
+        assertThat(jogoAtualizado.getVencedor()).isEqualTo(LadoCompetidor.AZUL);
+
+        assertThat(correcao.getTipo()).isEqualTo(TipoCorrecaoJogo.RESULTADO);
+        assertThat(correcao.getMotivo()).contains("digitacao");
+        assertThat(correcao.getDetalheAnterior()).contains("pontosVermelho=10");
+        assertThat(correcao.getDetalheNovo()).contains("pontosAzul=9");
+        assertThat(correcaoJogoRepository.findByJogoIdOrderByCriadoEmAsc(jogo.getId())).hasSize(1);
     }
 
     private Campeonato campeonato(String nome) {
@@ -248,6 +323,16 @@ class CompeticaoServiceTests {
         jogo.setPontosAzul(pontosAzul);
         jogo.setVencedor(vencedor);
         jogo.setStatus(StatusJogo.FINALIZADO);
+        return jogoRepository.save(jogo);
+    }
+
+    private Jogo jogoAgendado(Fase fase, Grupo grupo, Categoria categoria, Atleta vermelho, Atleta azul) {
+        Jogo jogo = new Jogo();
+        jogo.setFase(fase);
+        jogo.setGrupo(grupo);
+        jogo.setCategoria(categoria);
+        jogo.setAtletaVermelho(vermelho);
+        jogo.setAtletaAzul(azul);
         return jogoRepository.save(jogo);
     }
 }
