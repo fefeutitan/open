@@ -1,0 +1,128 @@
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Configuracao inicial</p>
+    <h1>Campeonatos</h1>
+    <p class="page-copy">Primeira tela operacional do sistema, ligada ao endpoint real de campeonatos.</p>
+  </div>
+  <button type="button" (click)="carregarCampeonatos()">Atualizar</button>
+</header>
+
+<section class="metrics" aria-label="Resumo de campeonatos">
+  <article>
+    <span>Total cadastrados</span>
+    <strong>{{ totalCampeonatos() }}</strong>
+  </article>
+  <article>
+    <span>Ativos ou encerrados</span>
+    <strong>{{ campeonatosAtivos() }}</strong>
+  </article>
+  <article>
+    <span>Endpoint</span>
+    <strong>/api/campeonatos</strong>
+  </article>
+</section>
+
+<section class="content-grid">
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Lista de campeonatos</h2>
+        <span>{{ totalCampeonatos() }} registro(s)</span>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="state-box">
+        <strong>Carregando campeonatos...</strong>
+      </div>
+    } @else if (campeonatos().length === 0) {
+      <div class="state-box">
+        <strong>Nenhum campeonato cadastrado</strong>
+        <p>Use o formulario ao lado para registrar o primeiro evento.</p>
+      </div>
+    } @else {
+      <div class="list">
+        @for (campeonato of campeonatos(); track trackByCampeonato($index, campeonato)) {
+          <article class="list-item">
+            <div class="list-item-main">
+              <div class="list-item-header">
+                <h3>{{ campeonato.nome }}</h3>
+                <span class="status-badge">{{ campeonato.status }}</span>
+              </div>
+              <p>{{ campeonato.descricao || 'Sem descricao cadastrada.' }}</p>
+            </div>
+
+            <dl class="meta-grid">
+              <div>
+                <dt>Local</dt>
+                <dd>{{ campeonato.local }}</dd>
+              </div>
+              <div>
+                <dt>Inicio</dt>
+                <dd>{{ campeonato.dataInicio || 'Nao definido' }}</dd>
+              </div>
+              <div>
+                <dt>Fim</dt>
+                <dd>{{ campeonato.dataFim || 'Nao definido' }}</dd>
+              </div>
+            </dl>
+          </article>
+        }
+      </div>
+    }
+  </article>
+
+  <article class="panel form-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Novo campeonato</h2>
+        <span>POST /api/campeonatos</span>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
+      <label>
+        <span>Nome</span>
+        <input type="text" formControlName="nome" />
+      </label>
+
+      <label>
+        <span>Local</span>
+        <input type="text" formControlName="local" />
+      </label>
+
+      <label class="full-width">
+        <span>Descricao</span>
+        <textarea rows="4" formControlName="descricao"></textarea>
+      </label>
+
+      <label>
+        <span>Data de inicio</span>
+        <input type="date" formControlName="dataInicio" />
+      </label>
+
+      <label>
+        <span>Data de fim</span>
+        <input type="date" formControlName="dataFim" />
+      </label>
+
+      @if (form.controls.nome.invalid && form.controls.nome.touched) {
+        <p class="field-error full-width">Informe o nome do campeonato.</p>
+      }
+
+      @if (form.controls.local.invalid && form.controls.local.touched) {
+        <p class="field-error full-width">Informe o local do campeonato.</p>
+      }
+
+      <button type="submit" [disabled]="saving()">
+        {{ saving() ? 'Salvando...' : 'Salvar campeonato' }}
+      </button>
+    </form>
+
+    @if (error()) {
+      <div class="feedback error">
+        {{ error() }}
+      </div>
+    }
+  </article>
+</section>
