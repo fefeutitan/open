@@ -1,0 +1,150 @@
+.page-header,
+.panel-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.back-link {
+  color: #b91c1c;
+  display: inline-block;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.page-copy,
+.panel-header span,
+.panel-label,
+.details-grid dt,
+.next-list p {
+  color: #64748b;
+}
+
+.status-badge {
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.hero-grid,
+.content-grid {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.hero-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.content-grid {
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.8fr);
+}
+
+.hero-panel,
+.panel,
+.state-box,
+.feedback {
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.hero-panel,
+.panel {
+  padding: 18px;
+}
+
+.hero-panel {
+  display: grid;
+  gap: 6px;
+}
+
+.hero-panel strong {
+  font-size: 1.2rem;
+}
+
+.details-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 18px 0 0;
+}
+
+.details-grid dt,
+.details-grid dd {
+  margin: 0;
+}
+
+.details-grid dd {
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.sidebar-panel {
+  align-content: start;
+}
+
+.next-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.next-list article {
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.next-list strong,
+.next-list p {
+  display: block;
+  margin: 0;
+}
+
+.next-list p {
+  margin-top: 6px;
+}
+
+.state-box,
+.feedback {
+  margin-top: 24px;
+  padding: 18px;
+  text-align: center;
+}
+
+.feedback.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+@media (max-width: 1000px) {
+  .hero-grid,
+  .content-grid,
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .page-header,
+  .panel-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

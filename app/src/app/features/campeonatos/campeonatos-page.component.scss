@@ -77,6 +77,17 @@
   margin: 0;
 }
 
+.title-link,
+.secondary-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.title-link:hover h3,
+.secondary-link:hover {
+  color: #b91c1c;
+}
+
 .status-badge {
   border-radius: 999px;
   background: #fee2e2;
@@ -95,6 +106,15 @@
 .meta-grid dd {
   font-weight: 700;
   margin-top: 4px;
+}
+
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.secondary-link {
+  font-weight: 700;
 }
 
 .form-panel {

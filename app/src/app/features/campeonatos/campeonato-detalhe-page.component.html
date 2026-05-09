@@ -1,0 +1,101 @@
+<header class="page-header">
+  <div>
+    <a class="back-link" routerLink="/campeonatos">Voltar para campeonatos</a>
+    <p class="eyebrow">Contexto do campeonato</p>
+
+    @if (campeonato(); as item) {
+      <h1>{{ item.nome }}</h1>
+      <p class="page-copy">{{ item.descricao || 'Sem descricao cadastrada.' }}</p>
+    } @else {
+      <h1>Detalhe de campeonato</h1>
+      <p class="page-copy">Carregando informacoes do evento.</p>
+    }
+  </div>
+
+  @if (campeonato(); as item) {
+    <span class="status-badge">{{ item.status }}</span>
+  }
+</header>
+
+@if (loading()) {
+  <section class="state-box">
+    <strong>Carregando campeonato...</strong>
+  </section>
+} @else if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+} @else if (campeonato(); as item) {
+  <section class="hero-grid">
+    <article class="hero-panel">
+      <span class="panel-label">Local</span>
+      <strong>{{ item.local }}</strong>
+    </article>
+    <article class="hero-panel">
+      <span class="panel-label">Periodo</span>
+      <strong>{{ periodo() }}</strong>
+    </article>
+    <article class="hero-panel">
+      <span class="panel-label">Identificador</span>
+      <strong>#{{ item.id }}</strong>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Resumo operacional</h2>
+          <span>Base para atletas, juizes, categorias, fases e jogos</span>
+        </div>
+      </div>
+
+      <dl class="details-grid">
+        <div>
+          <dt>Nome</dt>
+          <dd>{{ item.nome }}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{{ item.status }}</dd>
+        </div>
+        <div>
+          <dt>Data de inicio</dt>
+          <dd>{{ item.dataInicio || 'Nao definida' }}</dd>
+        </div>
+        <div>
+          <dt>Data de fim</dt>
+          <dd>{{ item.dataFim || 'Nao definida' }}</dd>
+        </div>
+        <div class="full-width">
+          <dt>Descricao</dt>
+          <dd>{{ item.descricao || 'Sem descricao cadastrada.' }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="panel sidebar-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Proximas areas</h2>
+          <span>Estrutura prevista da navegacao</span>
+        </div>
+      </div>
+
+      <div class="next-list">
+        <article>
+          <strong>Atletas</strong>
+          <p>Lista e cadastro vinculados ao campeonato.</p>
+        </article>
+        <article>
+          <strong>Categorias</strong>
+          <p>Faixas de genero, idade e peso do evento.</p>
+        </article>
+        <article>
+          <strong>Jogos</strong>
+          <p>Fila operacional, resultados e sumulas.</p>
+        </article>
+      </div>
+    </article>
+  </section>
+}

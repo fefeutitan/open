@@ -46,7 +46,9 @@
           <article class="list-item">
             <div class="list-item-main">
               <div class="list-item-header">
-                <h3>{{ campeonato.nome }}</h3>
+                <a class="title-link" [routerLink]="['/campeonatos', campeonato.id]">
+                  <h3>{{ campeonato.nome }}</h3>
+                </a>
                 <span class="status-badge">{{ campeonato.status }}</span>
               </div>
               <p>{{ campeonato.descricao || 'Sem descricao cadastrada.' }}</p>
@@ -66,6 +68,10 @@
                 <dd>{{ campeonato.dataFim || 'Nao definido' }}</dd>
               </div>
             </dl>
+
+            <div class="row-actions">
+              <a class="secondary-link" [routerLink]="['/campeonatos', campeonato.id]">Abrir detalhe</a>
+            </div>
           </article>
         }
       </div>

@@ -30,6 +30,10 @@ export class CampeonatoApiService {
     return this.http.get<Campeonato[]>('/api/campeonatos');
   }
 
+  buscar(id: number): Observable<Campeonato> {
+    return this.http.get<Campeonato>(`/api/campeonatos/${id}`);
+  }
+
   criar(payload: CampeonatoRequest): Observable<Campeonato> {
     return this.http.post<Campeonato>('/api/campeonatos', payload);
   }

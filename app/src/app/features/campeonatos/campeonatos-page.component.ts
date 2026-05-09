@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Campeonato, CampeonatoApiService } from './campeonato-api.service';
 
 @Component({
   selector: 'app-campeonatos-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './campeonatos-page.component.html',
   styleUrl: './campeonatos-page.component.scss'
 })
