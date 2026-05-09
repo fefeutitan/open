@@ -120,6 +120,18 @@
   margin-top: 6px;
 }
 
+.next-link {
+  color: #b91c1c;
+  display: inline-block;
+  font-weight: 700;
+  margin-top: 10px;
+  text-decoration: none;
+}
+
+.next-link:hover {
+  text-decoration: underline;
+}
+
 .state-box,
 .feedback {
   margin-top: 24px;

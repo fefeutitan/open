@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AtletasPageComponent } from './features/atletas/atletas-page.component';
 import { CampeonatoDetalhePageComponent } from './features/campeonatos/campeonato-detalhe-page.component';
 import { CampeonatosPageComponent } from './features/campeonatos/campeonatos-page.component';
 import { PainelPageComponent } from './features/painel/painel-page.component';
@@ -16,5 +17,9 @@ export const routes: Routes = [
   {
     path: 'campeonatos/:id',
     component: CampeonatoDetalhePageComponent
+  },
+  {
+    path: 'campeonatos/:id/atletas',
+    component: AtletasPageComponent
   }
 ];

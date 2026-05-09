@@ -1,0 +1,169 @@
+<header class="page-header">
+  <div>
+    @if (campeonatoId(); as id) {
+      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
+    }
+    <p class="eyebrow">Cadastro operacional</p>
+    <h1>Atletas</h1>
+    @if (campeonato(); as item) {
+      <p class="page-copy">Gerenciando atletas vinculados a {{ item.nome }}.</p>
+    } @else {
+      <p class="page-copy">Lista e cadastro de atletas por campeonato.</p>
+    }
+  </div>
+
+  @if (campeonato(); as item) {
+    <div class="header-context">
+      <strong>{{ item.nome }}</strong>
+      <span>{{ item.status }}</span>
+    </div>
+  }
+</header>
+
+@if (loading()) {
+  <section class="state-box">
+    <strong>Carregando atletas...</strong>
+  </section>
+} @else if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+} @else {
+  <section class="metrics" aria-label="Resumo de atletas">
+    <article>
+      <span>Total cadastrados</span>
+      <strong>{{ totalAtletas() }}</strong>
+    </article>
+    <article>
+      <span>Ativos</span>
+      <strong>{{ atletasAtivos() }}</strong>
+    </article>
+    <article>
+      <span>Dependencias</span>
+      <strong>{{ categorias().length }} categorias / {{ nucleos().length }} nucleos</strong>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Lista de atletas</h2>
+          <span>{{ totalAtletas() }} registro(s)</span>
+        </div>
+      </div>
+
+      @if (atletas().length === 0) {
+        <div class="state-box inline-state">
+          <strong>Nenhum atleta cadastrado</strong>
+          <p>Cadastre o primeiro atleta deste campeonato no formulario ao lado.</p>
+        </div>
+      } @else {
+        <div class="list">
+          @for (atleta of atletas(); track trackByAtleta($index, atleta)) {
+            <article class="list-item">
+              <div class="list-item-header">
+                <div>
+                  <h3>{{ atleta.nome }}</h3>
+                  <p>{{ atleta.documento || 'Sem documento informado' }}</p>
+                </div>
+                <span class="status-badge" [class.inactive]="atleta.status === 'INATIVO'">{{ atleta.status }}</span>
+              </div>
+
+              <dl class="meta-grid">
+                <div>
+                  <dt>Categoria</dt>
+                  <dd>{{ atleta.categoria.nome }}</dd>
+                </div>
+                <div>
+                  <dt>Nucleo</dt>
+                  <dd>{{ atleta.nucleo.nome }}</dd>
+                </div>
+                <div>
+                  <dt>Nascimento</dt>
+                  <dd>{{ atleta.dataNascimento || 'Nao informado' }}</dd>
+                </div>
+              </dl>
+            </article>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Novo atleta</h2>
+          <span>POST /api/cadastros/atletas</span>
+        </div>
+      </div>
+
+      @if (categorias().length === 0 || nucleos().length === 0) {
+        <div class="feedback warning">
+          Cadastre categorias e nucleos neste campeonato antes de incluir atletas.
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
+        <label>
+          <span>Nome</span>
+          <input type="text" formControlName="nome" />
+        </label>
+
+        <label>
+          <span>Documento</span>
+          <input type="text" formControlName="documento" />
+        </label>
+
+        <label>
+          <span>Data de nascimento</span>
+          <input type="date" formControlName="dataNascimento" />
+        </label>
+
+        <label>
+          <span>Status</span>
+          <select formControlName="status">
+            <option value="ATIVO">ATIVO</option>
+            <option value="INATIVO">INATIVO</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Categoria</span>
+          <select formControlName="categoriaId">
+            <option [ngValue]="0">Selecione</option>
+            @for (categoria of categorias(); track categoria.id) {
+              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Nucleo</span>
+          <select formControlName="nucleoId">
+            <option [ngValue]="0">Selecione</option>
+            @for (nucleo of nucleos(); track nucleo.id) {
+              <option [ngValue]="nucleo.id">{{ nucleo.nome }}</option>
+            }
+          </select>
+        </label>
+
+        @if (form.controls.nome.invalid && form.controls.nome.touched) {
+          <p class="field-error full-width">Informe o nome do atleta.</p>
+        }
+
+        @if (form.controls.categoriaId.invalid && form.controls.categoriaId.touched) {
+          <p class="field-error full-width">Selecione uma categoria.</p>
+        }
+
+        @if (form.controls.nucleoId.invalid && form.controls.nucleoId.touched) {
+          <p class="field-error full-width">Selecione um nucleo.</p>
+        }
+
+        <button type="submit" [disabled]="saving() || categorias().length === 0 || nucleos().length === 0">
+          {{ saving() ? 'Salvando...' : 'Salvar atleta' }}
+        </button>
+      </form>
+    </article>
+  </section>
+}
