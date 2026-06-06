@@ -2,43 +2,150 @@
   <div>
     <p class="eyebrow">Operacao do campeonato</p>
     <h1>Painel do Open Volta ao Mundo</h1>
+    @if (campeonatoSelecionado(); as campeonato) {
+      <p class="page-copy">Acompanhamento operacional de {{ campeonato.nome }}.</p>
+    } @else {
+      <p class="page-copy">Selecione um campeonato para carregar a fila operacional.</p>
+    }
   </div>
-  <button type="button">Novo jogo</button>
+
+  <div class="topbar-actions">
+    <button type="button" (click)="carregarPainel()" [disabled]="loadingCampeonatos() || loadingJogos()">
+      Atualizar painel
+    </button>
+    <a class="primary-link" [routerLink]="rotaJogos()">Novo jogo</a>
+  </div>
 </header>
+
+@if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+}
+
+<section class="filters-panel">
+  <label class="selector">
+    <span>Campeonato</span>
+    <select
+      [value]="campeonatoSelecionadoId() ?? 0"
+      (change)="selecionarCampeonato($any($event.target).value)"
+      [disabled]="loadingCampeonatos() || campeonatos().length === 0"
+    >
+      <option [value]="0">Selecione</option>
+      @for (campeonato of campeonatos(); track trackByCampeonato($index, campeonato)) {
+        <option [value]="campeonato.id">{{ campeonato.nome }}</option>
+      }
+    </select>
+  </label>
+
+  @if (campeonatoSelecionado(); as campeonato) {
+    <div class="championship-context">
+      <strong>{{ campeonato.nome }}</strong>
+      <span>{{ campeonato.status }} • {{ campeonato.local }}</span>
+    </div>
+  }
+</section>
 
 <section class="metrics" aria-label="Resumo operacional">
   <article>
     <span>Jogos hoje</span>
-    <strong>0</strong>
+    <strong>{{ jogosHoje() }}</strong>
   </article>
   <article>
     <span>Em andamento</span>
-    <strong>0</strong>
+    <strong>{{ jogosEmAndamento() }}</strong>
   </article>
   <article>
     <span>Desempates pendentes</span>
-    <strong>0</strong>
+    <strong>{{ desempatesPendentes() }}</strong>
+  </article>
+  <article>
+    <span>Finalizados</span>
+    <strong>{{ jogosFinalizados() }}</strong>
   </article>
 </section>
 
 <section class="content-grid">
   <article class="panel">
     <div class="panel-header">
-      <h2>Fila de jogos</h2>
-      <span>API /api/competicao/jogos</span>
+      <div>
+        <h2>Fila de jogos</h2>
+        <span>GET /api/competicao/jogos?campeonatoId=...</span>
+      </div>
+      <button type="button" class="secondary-button" (click)="atualizarJogos()" [disabled]="loadingJogos()">
+        {{ loadingJogos() ? 'Atualizando...' : 'Atualizar jogos' }}
+      </button>
     </div>
-    <div class="empty-state">
-      <strong>Nenhum jogo carregado</strong>
-      <p>A proxima etapa e conectar esta tela aos endpoints do backend.</p>
-    </div>
+
+    @if (loadingCampeonatos() || loadingJogos()) {
+      <div class="empty-state">
+        <strong>Carregando fila operacional...</strong>
+      </div>
+    } @else if (campeonatos().length === 0) {
+      <div class="empty-state">
+        <strong>Nenhum campeonato cadastrado</strong>
+        <p>Cadastre um campeonato para habilitar o painel.</p>
+      </div>
+    } @else if (!campeonatoSelecionado()) {
+      <div class="empty-state">
+        <strong>Selecione um campeonato</strong>
+        <p>O painel usa um campeonato por vez para consolidar jogos e pendencias.</p>
+      </div>
+    } @else if (filaOperacional().length === 0) {
+      <div class="empty-state">
+        <strong>Nenhum jogo operacional encontrado</strong>
+        <p>Crie jogos ou acompanhe os finalizados na tela detalhada do campeonato.</p>
+      </div>
+    } @else {
+      <div class="queue-list">
+        @for (jogo of filaOperacional(); track trackByJogo($index, jogo)) {
+          <article class="queue-item">
+            <div class="queue-header">
+              <div>
+                <h3>{{ confronto(jogo) }}</h3>
+                <p>{{ detalhesJogo(jogo) }}</p>
+              </div>
+              <span class="status-badge" [class.alert]="statusLabel(jogo) === 'DESEMPATE'">
+                {{ statusLabel(jogo) }}
+              </span>
+            </div>
+
+            <dl class="meta-grid">
+              <div>
+                <dt>Horario</dt>
+                <dd>{{ formatarDataHora(jogo.dataHora) }}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{{ jogo.status }}</dd>
+              </div>
+              <div>
+                <dt>Categoria</dt>
+                <dd>{{ jogo.categoria.nome }}</dd>
+              </div>
+            </dl>
+          </article>
+        }
+      </div>
+    }
   </article>
 
   <article class="panel compact">
     <div class="panel-header">
       <h2>Acoes rapidas</h2>
     </div>
-    <button type="button">Iniciar jogo</button>
-    <button type="button">Registrar sumula</button>
-    <button type="button">Corrigir resultado</button>
+
+    <a class="quick-link" [routerLink]="rotaJogos()">Operar jogos</a>
+    <a class="quick-link" [routerLink]="rotaFases()">Fases e grupos</a>
+    <a class="quick-link" [routerLink]="rotaDetalhe()">Abrir campeonato</a>
+    <a class="quick-link" routerLink="/campeonatos">Todos os campeonatos</a>
+
+    <div class="side-note">
+      <strong>Leitura do painel</strong>
+      <p>
+        Desempates pendentes sao inferidos a partir de jogos agendados com o mesmo confronto de um empate ja
+        finalizado na mesma fase.
+      </p>
+    </div>
   </article>
 </section>
