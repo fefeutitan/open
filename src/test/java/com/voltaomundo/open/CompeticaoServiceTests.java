@@ -197,6 +197,35 @@ class CompeticaoServiceTests {
     }
 
     @Test
+    void deveListarDesempatesPendentesDoCampeonato() {
+        Campeonato campeonato = campeonato("Open VM");
+        Categoria categoria = categoria(campeonato, "Adulto");
+        Nucleo nucleo = nucleo(campeonato, "Nucleo A");
+
+        Atleta atleta1 = atleta("Atleta 1", categoria, nucleo);
+        Atleta atleta2 = atleta("Atleta 2", categoria, nucleo);
+        Atleta atleta3 = atleta("Atleta 3", categoria, nucleo);
+        Atleta atleta4 = atleta("Atleta 4", categoria, nucleo);
+
+        Fase eliminatoria = fase(campeonato, "Quartas", TipoFase.ELIMINATORIA, 1, null);
+
+        Jogo jogoEmpatado = jogo(eliminatoria, null, categoria, atleta1, atleta2, 10, 10, null);
+        Jogo desempatePendente = jogoAgendado(eliminatoria, null, categoria, atleta1, atleta2);
+        jogoAgendado(eliminatoria, null, categoria, atleta3, atleta4);
+
+        List<Jogo> pendentes = competicaoService.listarDesempatesPendentes(campeonato.getId());
+
+        assertThat(pendentes)
+                .extracting(Jogo::getId)
+                .containsExactly(desempatePendente.getId());
+        assertThat(pendentes)
+                .extracting(Jogo::getFase)
+                .extracting(Fase::getId)
+                .containsOnly(eliminatoria.getId());
+        assertThat(jogoEmpatado.getId()).isNotNull();
+    }
+
+    @Test
     void deveIniciarJogoAgendado() {
         Campeonato campeonato = campeonato("Open VM");
         Categoria categoria = categoria(campeonato, "Adulto");

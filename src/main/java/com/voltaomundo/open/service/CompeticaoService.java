@@ -152,6 +152,17 @@ public class CompeticaoService {
         return calcularClassificacao(jogos);
     }
 
+    @Transactional(readOnly = true)
+    public List<Jogo> listarDesempatesPendentes(Long campeonatoId) {
+        List<Jogo> jogos = campeonatoId == null
+                ? jogoRepository.findAll()
+                : jogoRepository.findByFaseCampeonatoId(campeonatoId);
+
+        return jogos.stream()
+                .filter(this::ehDesempatePendente)
+                .toList();
+    }
+
     @Transactional
     public List<Jogo> gerarMataMata(Long faseGruposId, Long faseEliminatoriaId) {
         Fase faseGrupos = lookupService.fase(faseGruposId);
@@ -318,6 +329,16 @@ public class CompeticaoService {
                 && jogo.getPontosVermelho() != null
                 && jogo.getPontosAzul() != null
                 && jogo.getPontosVermelho().equals(jogo.getPontosAzul());
+    }
+
+    private boolean ehDesempatePendente(Jogo jogo) {
+        return jogo.getStatus() == StatusJogo.AGENDADO
+                && jogoRepository.findByFaseId(jogo.getFase().getId()).stream()
+                        .anyMatch(candidato -> candidato.getStatus() == StatusJogo.FINALIZADO
+                                && candidato.getPontosVermelho() != null
+                                && candidato.getPontosAzul() != null
+                                && candidato.getPontosVermelho().equals(candidato.getPontosAzul())
+                                && mesmosAtletas(candidato, jogo));
     }
 
     private String detalheResultado(Jogo jogo) {

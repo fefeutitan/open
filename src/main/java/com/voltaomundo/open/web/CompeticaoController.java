@@ -88,6 +88,11 @@ public class CompeticaoController {
         return campeonatoId == null ? jogoRepository.findAll() : jogoRepository.findByFaseCampeonatoId(campeonatoId);
     }
 
+    @GetMapping("/jogos/desempates-pendentes")
+    public List<Jogo> listarDesempatesPendentes(@RequestParam(required = false) Long campeonatoId) {
+        return competicaoService.listarDesempatesPendentes(campeonatoId);
+    }
+
     @PostMapping("/jogos")
     public Jogo criarJogo(@Valid @RequestBody JogoRequest request) {
         return competicaoService.criarJogo(request);

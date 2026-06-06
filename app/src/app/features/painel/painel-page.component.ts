@@ -18,6 +18,7 @@ export class PainelPageComponent implements OnInit {
   readonly campeonatos = signal<Campeonato[]>([]);
   readonly campeonatoSelecionadoId = signal<number | null>(null);
   readonly jogos = signal<JogoItem[]>([]);
+  readonly desempates = signal<JogoItem[]>([]);
   readonly loadingCampeonatos = signal(false);
   readonly loadingJogos = signal(false);
   readonly error = signal<string | null>(null);
@@ -29,7 +30,7 @@ export class PainelPageComponent implements OnInit {
   readonly jogosEmAndamento = computed(() =>
     this.jogos().filter((jogo) => jogo.status === 'EM_ANDAMENTO').length
   );
-  readonly desempatesPendentes = computed(() => this.calcularDesempatesPendentes(this.jogos()));
+  readonly desempatesPendentes = computed(() => this.desempates().length);
   readonly jogosFinalizados = computed(() =>
     this.jogos().filter((jogo) => jogo.status === 'FINALIZADO').length
   );
@@ -109,7 +110,7 @@ export class PainelPageComponent implements OnInit {
   }
 
   statusLabel(jogo: JogoItem): string {
-    if (this.ehDesempatePendente(jogo)) {
+    if (this.desempates().some((item) => item.id === jogo.id)) {
       return 'DESEMPATE';
     }
 
@@ -159,6 +160,7 @@ export class PainelPageComponent implements OnInit {
 
     if (!campeonatoId) {
       this.jogos.set([]);
+      this.desempates.set([]);
       return;
     }
 
@@ -167,8 +169,17 @@ export class PainelPageComponent implements OnInit {
 
     this.jogosApi.listar(campeonatoId).subscribe({
       next: (jogos) => {
-        this.jogos.set(jogos);
-        this.loadingJogos.set(false);
+        this.jogosApi.listarDesempatesPendentes(campeonatoId).subscribe({
+          next: (desempates) => {
+            this.jogos.set(jogos);
+            this.desempates.set(desempates);
+            this.loadingJogos.set(false);
+          },
+          error: () => {
+            this.error.set('Nao foi possivel carregar os desempates pendentes do campeonato selecionado.');
+            this.loadingJogos.set(false);
+          }
+        });
       },
       error: () => {
         this.error.set('Nao foi possivel carregar os jogos do campeonato selecionado.');
@@ -209,37 +220,4 @@ export class PainelPageComponent implements OnInit {
     const dataB = b.dataHora ? new Date(b.dataHora).getTime() : Number.MAX_SAFE_INTEGER;
     return dataA - dataB;
   }
-
-  private calcularDesempatesPendentes(jogos: JogoItem[]): number {
-    return jogos.filter((jogo) => this.ehDesempatePendente(jogo)).length;
-  }
-
-  private ehDesempatePendente(jogo: JogoItem): boolean {
-    if (jogo.status !== 'AGENDADO') {
-      return false;
-    }
-
-    return jogosTemEmpateAnterior(this.jogos(), jogo);
-  }
-}
-
-function jogosTemEmpateAnterior(jogos: JogoItem[], candidato: JogoItem): boolean {
-  return jogos.some((jogo) =>
-    jogo.id !== candidato.id
-    && jogo.fase.id === candidato.fase.id
-    && jogo.status === 'FINALIZADO'
-    && jogo.pontosVermelho != null
-    && jogo.pontosAzul != null
-    && jogo.pontosVermelho === jogo.pontosAzul
-    && mesmosAtletas(jogo, candidato)
-  );
-}
-
-function mesmosAtletas(a: JogoItem, b: JogoItem): boolean {
-  const aVermelho = a.atletaVermelho.id;
-  const aAzul = a.atletaAzul.id;
-  const bVermelho = b.atletaVermelho.id;
-  const bAzul = b.atletaAzul.id;
-
-  return (aVermelho === bVermelho && aAzul === bAzul) || (aVermelho === bAzul && aAzul === bVermelho);
 }

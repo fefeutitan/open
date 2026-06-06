@@ -94,6 +94,11 @@ export class JogosApiService {
     return this.http.get<JogoItem[]>('/api/competicao/jogos', { params });
   }
 
+  listarDesempatesPendentes(campeonatoId: number): Observable<JogoItem[]> {
+    const params = new HttpParams().set('campeonatoId', campeonatoId);
+    return this.http.get<JogoItem[]>('/api/competicao/jogos/desempates-pendentes', { params });
+  }
+
   iniciar(jogoId: number): Observable<JogoItem> {
     return this.http.patch<JogoItem>(`/api/competicao/jogos/${jogoId}/iniciar`, {});
   }
