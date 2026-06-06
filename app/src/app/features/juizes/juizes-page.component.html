@@ -1,0 +1,122 @@
+<header class="page-header">
+  <div>
+    @if (campeonatoId(); as id) {
+      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
+    }
+    <p class="eyebrow">Cadastro operacional</p>
+    <h1>Juizes</h1>
+    @if (campeonato(); as item) {
+      <p class="page-copy">Gerenciando juizes vinculados a {{ item.nome }}.</p>
+    } @else {
+      <p class="page-copy">Lista e cadastro de juizes por campeonato.</p>
+    }
+  </div>
+
+  @if (campeonato(); as item) {
+    <div class="header-context">
+      <strong>{{ item.nome }}</strong>
+      <span>{{ item.status }}</span>
+    </div>
+  }
+</header>
+
+@if (loading()) {
+  <section class="state-box">
+    <strong>Carregando juizes...</strong>
+  </section>
+} @else if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+} @else {
+  <section class="metrics" aria-label="Resumo de juizes">
+    <article>
+      <span>Total cadastrados</span>
+      <strong>{{ totalJuizes() }}</strong>
+    </article>
+    <article>
+      <span>Com registro</span>
+      <strong>{{ juizesComRegistro() }}</strong>
+    </article>
+    <article>
+      <span>Endpoint</span>
+      <strong>/api/cadastros/juizes</strong>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Lista de juizes</h2>
+          <span>{{ totalJuizes() }} registro(s)</span>
+        </div>
+      </div>
+
+      @if (juizes().length === 0) {
+        <div class="state-box inline-state">
+          <strong>Nenhum juiz cadastrado</strong>
+          <p>Cadastre o primeiro juiz deste campeonato no formulario ao lado.</p>
+        </div>
+      } @else {
+        <div class="list">
+          @for (juiz of juizes(); track trackByJuiz($index, juiz)) {
+            <article class="list-item">
+              <div class="list-item-header">
+                <div>
+                  <h3>{{ juiz.nome }}</h3>
+                  <p>{{ juiz.registro || 'Registro nao informado' }}</p>
+                </div>
+                <span class="status-badge">{{ juiz.registro ? 'REGISTRADO' : 'PENDENTE' }}</span>
+              </div>
+
+              <dl class="meta-grid">
+                <div>
+                  <dt>Nome</dt>
+                  <dd>{{ juiz.nome }}</dd>
+                </div>
+                <div>
+                  <dt>Registro</dt>
+                  <dd>{{ juiz.registro || 'Nao informado' }}</dd>
+                </div>
+                <div>
+                  <dt>Identificador</dt>
+                  <dd>#{{ juiz.id }}</dd>
+                </div>
+              </dl>
+            </article>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Novo juiz</h2>
+          <span>POST /api/cadastros/juizes</span>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
+        <label class="full-width">
+          <span>Nome</span>
+          <input type="text" formControlName="nome" />
+        </label>
+
+        <label class="full-width">
+          <span>Registro</span>
+          <input type="text" formControlName="registro" />
+        </label>
+
+        @if (form.controls.nome.invalid && form.controls.nome.touched) {
+          <p class="field-error full-width">Informe o nome do juiz.</p>
+        }
+
+        <button type="submit" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar juiz' }}
+        </button>
+      </form>
+    </article>
+  </section>
+}

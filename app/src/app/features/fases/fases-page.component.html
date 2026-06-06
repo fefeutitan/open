@@ -1,0 +1,198 @@
+<header class="page-header">
+  <div>
+    @if (campeonatoId(); as id) {
+      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
+    }
+    <p class="eyebrow">Configuracao da competicao</p>
+    <h1>Fases e grupos</h1>
+    @if (campeonato(); as item) {
+      <p class="page-copy">Estrutura competitiva vinculada a {{ item.nome }}.</p>
+    } @else {
+      <p class="page-copy">Cadastro de fases e organizacao de grupos do campeonato.</p>
+    }
+  </div>
+
+  @if (campeonato(); as item) {
+    <div class="header-context">
+      <strong>{{ item.nome }}</strong>
+      <span>{{ item.status }}</span>
+    </div>
+  }
+</header>
+
+@if (loading()) {
+  <section class="state-box">
+    <strong>Carregando fases...</strong>
+  </section>
+} @else if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+} @else {
+  <section class="metrics" aria-label="Resumo de fases e grupos">
+    <article>
+      <span>Total de fases</span>
+      <strong>{{ totalFases() }}</strong>
+    </article>
+    <article>
+      <span>Fases de grupos</span>
+      <strong>{{ fasesGrupos() }}</strong>
+    </article>
+    <article>
+      <span>Eliminatorias</span>
+      <strong>{{ fasesEliminatorias() }}</strong>
+    </article>
+    <article>
+      <span>Total de grupos</span>
+      <strong>{{ totalGrupos() }}</strong>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Estrutura atual</h2>
+          <span>{{ totalFases() }} fase(s) cadastrada(s)</span>
+        </div>
+      </div>
+
+      @if (fases().length === 0) {
+        <div class="state-box inline-state">
+          <strong>Nenhuma fase cadastrada</strong>
+          <p>Comece criando a fase de grupos ou a primeira fase eliminatoria.</p>
+        </div>
+      } @else {
+        <div class="list">
+          @for (fase of fases(); track trackByFase($index, fase)) {
+            <article class="list-item">
+              <div class="list-item-header">
+                <div>
+                  <h3>{{ fase.nome }}</h3>
+                  <p>{{ descricaoFase(fase) }}</p>
+                </div>
+                <span class="status-badge" [class.alt]="fase.tipo === 'ELIMINATORIA'">{{ fase.tipo }}</span>
+              </div>
+
+              <dl class="meta-grid">
+                <div>
+                  <dt>Ordem</dt>
+                  <dd>{{ fase.ordem }}</dd>
+                </div>
+                <div>
+                  <dt>Tipo</dt>
+                  <dd>{{ fase.tipo }}</dd>
+                </div>
+                <div>
+                  <dt>Classificados</dt>
+                  <dd>{{ fase.classificadosPorGrupo ?? 'Nao se aplica' }}</dd>
+                </div>
+              </dl>
+
+              @if (fase.tipo === 'GRUPOS') {
+                <div class="group-block">
+                  <strong>Grupos</strong>
+                  @if (gruposDaFase(fase.id).length === 0) {
+                    <p class="muted">Nenhum grupo cadastrado nesta fase.</p>
+                  } @else {
+                    <div class="chips">
+                      @for (grupo of gruposDaFase(fase.id); track trackByGrupo($index, grupo)) {
+                        <span>{{ grupo.nome }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </article>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="panel stack-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Nova fase</h2>
+          <span>POST /api/competicao/fases</span>
+        </div>
+      </div>
+
+      <form [formGroup]="faseForm" (ngSubmit)="salvarFase()" class="form-grid">
+        <label class="full-width">
+          <span>Nome</span>
+          <input type="text" formControlName="nome" />
+        </label>
+
+        <label>
+          <span>Tipo</span>
+          <select formControlName="tipo">
+            <option value="GRUPOS">GRUPOS</option>
+            <option value="ELIMINATORIA">ELIMINATORIA</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Ordem</span>
+          <input type="number" min="1" formControlName="ordem" />
+        </label>
+
+        <label class="full-width">
+          <span>Classificados por grupo</span>
+          <input type="number" min="1" formControlName="classificadosPorGrupo" />
+        </label>
+
+        @if (faseForm.controls.nome.invalid && faseForm.controls.nome.touched) {
+          <p class="field-error full-width">Informe o nome da fase.</p>
+        }
+
+        <button type="submit" [disabled]="savingFase()">
+          {{ savingFase() ? 'Salvando...' : 'Salvar fase' }}
+        </button>
+      </form>
+
+      <div class="separator"></div>
+
+      <div class="panel-header">
+        <div>
+          <h2>Novo grupo</h2>
+          <span>POST /api/competicao/grupos</span>
+        </div>
+      </div>
+
+      @if (fasesDeGrupos().length === 0) {
+        <div class="feedback warning inline-feedback">
+          Crie primeiro uma fase do tipo GRUPOS para habilitar o cadastro de grupos.
+        </div>
+      } @else {
+        <form [formGroup]="grupoForm" (ngSubmit)="salvarGrupo()" class="form-grid">
+          <label class="full-width">
+            <span>Fase</span>
+            <select formControlName="faseId">
+              <option [ngValue]="0">Selecione</option>
+              @for (fase of fasesDeGrupos(); track trackByFase($index, fase)) {
+                <option [ngValue]="fase.id">{{ fase.nome }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="full-width">
+            <span>Nome do grupo</span>
+            <input type="text" formControlName="nome" />
+          </label>
+
+          @if (grupoForm.controls.faseId.invalid && grupoForm.controls.faseId.touched) {
+            <p class="field-error full-width">Selecione a fase de grupos.</p>
+          }
+
+          @if (grupoForm.controls.nome.invalid && grupoForm.controls.nome.touched) {
+            <p class="field-error full-width">Informe o nome do grupo.</p>
+          }
+
+          <button type="submit" [disabled]="savingGrupo()">
+            {{ savingGrupo() ? 'Salvando...' : 'Salvar grupo' }}
+          </button>
+        </form>
+      }
+    </article>
+  </section>
+}

@@ -91,10 +91,27 @@
         <article>
           <strong>Categorias</strong>
           <p>Faixas de genero, idade e peso do evento.</p>
+          <a class="next-link" [routerLink]="['/campeonatos', item.id, 'categorias']">Abrir categorias</a>
+        </article>
+        <article>
+          <strong>Nucleos</strong>
+          <p>Equipes e responsaveis vinculados ao campeonato.</p>
+          <a class="next-link" [routerLink]="['/campeonatos', item.id, 'nucleos']">Abrir nucleos</a>
+        </article>
+        <article>
+          <strong>Juizes</strong>
+          <p>Cadastro operacional para sumulas e avaliacoes.</p>
+          <a class="next-link" [routerLink]="['/campeonatos', item.id, 'juizes']">Abrir juizes</a>
+        </article>
+        <article>
+          <strong>Fases</strong>
+          <p>Configuracao de grupos e eliminatorias do campeonato.</p>
+          <a class="next-link" [routerLink]="['/campeonatos', item.id, 'fases']">Abrir fases</a>
         </article>
         <article>
           <strong>Jogos</strong>
           <p>Fila operacional, resultados e sumulas.</p>
+          <a class="next-link" [routerLink]="['/campeonatos', item.id, 'jogos']">Abrir jogos</a>
         </article>
       </div>
     </article>

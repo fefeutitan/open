@@ -6,6 +6,10 @@ export interface CategoriaResumo {
   id: number;
   nome: string;
   genero: string;
+  idadeMinima: number | null;
+  idadeMaxima: number | null;
+  pesoMinimo: number | null;
+  pesoMaximo: number | null;
 }
 
 export interface NucleoResumo {
@@ -13,6 +17,12 @@ export interface NucleoResumo {
   nome: string;
   cidade: string | null;
   responsavel: string | null;
+}
+
+export interface JuizResumo {
+  id: number;
+  nome: string;
+  registro: string | null;
 }
 
 export interface Atleta {
@@ -32,6 +42,29 @@ export interface AtletaRequest {
   status: 'ATIVO' | 'INATIVO';
   categoriaId: number;
   nucleoId: number;
+}
+
+export interface CategoriaRequest {
+  campeonatoId: number;
+  nome: string;
+  genero: 'MASCULINO' | 'FEMININO' | 'MISTO';
+  idadeMinima: number | null;
+  idadeMaxima: number | null;
+  pesoMinimo: number | null;
+  pesoMaximo: number | null;
+}
+
+export interface NucleoRequest {
+  campeonatoId: number;
+  nome: string;
+  cidade: string | null;
+  responsavel: string | null;
+}
+
+export interface JuizRequest {
+  campeonatoId: number;
+  nome: string;
+  registro: string | null;
 }
 
 @Injectable({
@@ -54,8 +87,25 @@ export class CadastroApiService {
     return this.http.get<CategoriaResumo[]>('/api/cadastros/categorias', { params });
   }
 
+  criarCategoria(payload: CategoriaRequest): Observable<CategoriaResumo> {
+    return this.http.post<CategoriaResumo>('/api/cadastros/categorias', payload);
+  }
+
   listarNucleos(campeonatoId: number): Observable<NucleoResumo[]> {
     const params = new HttpParams().set('campeonatoId', campeonatoId);
     return this.http.get<NucleoResumo[]>('/api/cadastros/nucleos', { params });
+  }
+
+  criarNucleo(payload: NucleoRequest): Observable<NucleoResumo> {
+    return this.http.post<NucleoResumo>('/api/cadastros/nucleos', payload);
+  }
+
+  listarJuizes(campeonatoId: number): Observable<JuizResumo[]> {
+    const params = new HttpParams().set('campeonatoId', campeonatoId);
+    return this.http.get<JuizResumo[]>('/api/cadastros/juizes', { params });
+  }
+
+  criarJuiz(payload: JuizRequest): Observable<JuizResumo> {
+    return this.http.post<JuizResumo>('/api/cadastros/juizes', payload);
   }
 }

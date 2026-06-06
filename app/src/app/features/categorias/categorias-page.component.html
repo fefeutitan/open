@@ -1,0 +1,146 @@
+<header class="page-header">
+  <div>
+    @if (campeonatoId(); as id) {
+      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
+    }
+    <p class="eyebrow">Cadastro operacional</p>
+    <h1>Categorias</h1>
+    @if (campeonato(); as item) {
+      <p class="page-copy">Gerenciando categorias vinculadas a {{ item.nome }}.</p>
+    } @else {
+      <p class="page-copy">Lista e cadastro de categorias por campeonato.</p>
+    }
+  </div>
+
+  @if (campeonato(); as item) {
+    <div class="header-context">
+      <strong>{{ item.nome }}</strong>
+      <span>{{ item.status }}</span>
+    </div>
+  }
+</header>
+
+@if (loading()) {
+  <section class="state-box">
+    <strong>Carregando categorias...</strong>
+  </section>
+} @else if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+} @else {
+  <section class="metrics" aria-label="Resumo de categorias">
+    <article>
+      <span>Total cadastradas</span>
+      <strong>{{ totalCategorias() }}</strong>
+    </article>
+    <article>
+      <span>Generos</span>
+      <strong>M/F/Misto</strong>
+    </article>
+    <article>
+      <span>Endpoint</span>
+      <strong>/api/cadastros/categorias</strong>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Lista de categorias</h2>
+          <span>{{ totalCategorias() }} registro(s)</span>
+        </div>
+      </div>
+
+      @if (categorias().length === 0) {
+        <div class="state-box inline-state">
+          <strong>Nenhuma categoria cadastrada</strong>
+          <p>Cadastre a primeira categoria deste campeonato no formulario ao lado.</p>
+        </div>
+      } @else {
+        <div class="list">
+          @for (categoria of categorias(); track trackByCategoria($index, categoria)) {
+            <article class="list-item">
+              <div class="list-item-header">
+                <div>
+                  <h3>{{ categoria.nome }}</h3>
+                  <p>{{ faixaIdade(categoria) }}</p>
+                </div>
+                <span class="status-badge">{{ categoria.genero }}</span>
+              </div>
+
+              <dl class="meta-grid">
+                <div>
+                  <dt>Genero</dt>
+                  <dd>{{ categoria.genero }}</dd>
+                </div>
+                <div>
+                  <dt>Faixa etaria</dt>
+                  <dd>{{ faixaIdade(categoria) }}</dd>
+                </div>
+                <div>
+                  <dt>Faixa de peso</dt>
+                  <dd>{{ faixaPeso(categoria) }}</dd>
+                </div>
+              </dl>
+            </article>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Nova categoria</h2>
+          <span>POST /api/cadastros/categorias</span>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
+        <label class="full-width">
+          <span>Nome</span>
+          <input type="text" formControlName="nome" />
+        </label>
+
+        <label>
+          <span>Genero</span>
+          <select formControlName="genero">
+            <option value="MASCULINO">MASCULINO</option>
+            <option value="FEMININO">FEMININO</option>
+            <option value="MISTO">MISTO</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Idade minima</span>
+          <input type="number" min="0" formControlName="idadeMinima" />
+        </label>
+
+        <label>
+          <span>Idade maxima</span>
+          <input type="number" min="0" formControlName="idadeMaxima" />
+        </label>
+
+        <label>
+          <span>Peso minimo (kg)</span>
+          <input type="number" min="0" step="0.1" formControlName="pesoMinimo" />
+        </label>
+
+        <label>
+          <span>Peso maximo (kg)</span>
+          <input type="number" min="0" step="0.1" formControlName="pesoMaximo" />
+        </label>
+
+        @if (form.controls.nome.invalid && form.controls.nome.touched) {
+          <p class="field-error full-width">Informe o nome da categoria.</p>
+        }
+
+        <button type="submit" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar categoria' }}
+        </button>
+      </form>
+    </article>
+  </section>
+}

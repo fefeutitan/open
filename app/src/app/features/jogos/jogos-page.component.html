@@ -1,0 +1,430 @@
+<header class="page-header">
+  <div>
+    @if (campeonatoId(); as id) {
+      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
+    }
+    <p class="eyebrow">Operacao da competicao</p>
+    <h1>Jogos</h1>
+    @if (campeonato(); as item) {
+      <p class="page-copy">Fila operacional de jogos vinculados a {{ item.nome }}.</p>
+    } @else {
+      <p class="page-copy">Lista e acompanhamento dos jogos por campeonato.</p>
+    }
+  </div>
+
+  @if (campeonato(); as item) {
+    <div class="header-context">
+      <strong>{{ item.nome }}</strong>
+      <span>{{ item.status }}</span>
+    </div>
+  }
+</header>
+
+@if (loading()) {
+  <section class="state-box">
+    <strong>Carregando jogos...</strong>
+  </section>
+} @else if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+} @else {
+  <section class="metrics" aria-label="Resumo de jogos">
+    <article>
+      <span>Total</span>
+      <strong>{{ totalJogos() }}</strong>
+    </article>
+    <article>
+      <span>Agendados</span>
+      <strong>{{ jogosAgendados() }}</strong>
+    </article>
+    <article>
+      <span>Em andamento</span>
+      <strong>{{ jogosEmAndamento() }}</strong>
+    </article>
+    <article>
+      <span>Finalizados</span>
+      <strong>{{ jogosFinalizados() }}</strong>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Fila de jogos</h2>
+          <span>{{ jogosFiltrados().length }} item(ns) em {{ descricaoStatus(statusFiltro()) }}</span>
+        </div>
+        <button type="button" class="secondary-button" (click)="atualizar()" [disabled]="refreshing()">
+          {{ refreshing() ? 'Atualizando...' : 'Atualizar' }}
+        </button>
+      </div>
+
+      <div class="filter-bar" aria-label="Filtro por status">
+        <button type="button" class="filter-button" [class.active]="statusFiltro() === 'TODOS'" (click)="definirFiltro('TODOS')">Todos</button>
+        <button type="button" class="filter-button" [class.active]="statusFiltro() === 'AGENDADO'" (click)="definirFiltro('AGENDADO')">Agendados</button>
+        <button type="button" class="filter-button" [class.active]="statusFiltro() === 'EM_ANDAMENTO'" (click)="definirFiltro('EM_ANDAMENTO')">Em andamento</button>
+        <button type="button" class="filter-button" [class.active]="statusFiltro() === 'FINALIZADO'" (click)="definirFiltro('FINALIZADO')">Finalizados</button>
+      </div>
+
+      @if (actionError()) {
+        <div class="feedback error inline-feedback">
+          {{ actionError() }}
+        </div>
+      }
+
+      @if (actionSuccess()) {
+        <div class="feedback success inline-feedback">
+          {{ actionSuccess() }}
+        </div>
+      }
+
+      @if (jogosFiltrados().length === 0) {
+        <div class="state-box inline-state">
+          <strong>Nenhum jogo encontrado</strong>
+          <p>O filtro atual nao encontrou jogos para este campeonato.</p>
+        </div>
+      } @else {
+        <div class="list">
+          @for (jogo of jogosFiltrados(); track trackByJogo($index, jogo)) {
+            <article class="list-item">
+              <div class="list-item-header">
+                <div>
+                  <h3>{{ jogo.atletaVermelho.nome }} x {{ jogo.atletaAzul.nome }}</h3>
+                  <p>{{ jogo.fase.nome }}</p>
+                  @if (grupoLabel(jogo); as grupo) {
+                    <p>{{ grupo }}</p>
+                  }
+                </div>
+                <span class="status-badge" [class.status-running]="jogo.status === 'EM_ANDAMENTO'" [class.status-finished]="jogo.status === 'FINALIZADO'">
+                  {{ jogo.status }}
+                </span>
+              </div>
+
+              <dl class="meta-grid">
+                <div>
+                  <dt>Categoria</dt>
+                  <dd>{{ jogo.categoria.nome }}</dd>
+                </div>
+                <div>
+                  <dt>Horario</dt>
+                  <dd>{{ formatoDataHora(jogo.dataHora) }}</dd>
+                </div>
+                <div>
+                  <dt>Placar</dt>
+                  <dd>{{ placar(jogo) }}</dd>
+                </div>
+                <div>
+                  <dt>Vermelho</dt>
+                  <dd>{{ jogo.atletaVermelho.nome }}</dd>
+                </div>
+                <div>
+                  <dt>Azul</dt>
+                  <dd>{{ jogo.atletaAzul.nome }}</dd>
+                </div>
+                <div>
+                  <dt>Vencedor</dt>
+                  <dd>{{ vencedor(jogo) }}</dd>
+                </div>
+              </dl>
+
+              <div class="row-actions">
+                @if (jogo.status === 'AGENDADO') {
+                  <button type="button" (click)="iniciarJogo(jogo.id)" [disabled]="jogoEmAcaoId() === jogo.id">
+                    {{ jogoEmAcaoId() === jogo.id ? 'Iniciando...' : 'Iniciar jogo' }}
+                  </button>
+                } @else if (jogo.status === 'EM_ANDAMENTO') {
+                  <div class="action-cluster">
+                    <button type="button" class="secondary-button" (click)="abrirEditorResultado(jogo)">
+                      Registrar resultado
+                    </button>
+                    <button type="button" class="secondary-button" (click)="abrirEditorSumula(jogo)" [disabled]="!podeRegistrarSumula()">
+                      Registrar sumula
+                    </button>
+                  </div>
+                } @else {
+                  <div class="action-cluster">
+                    <button type="button" class="secondary-button" (click)="abrirEditorCorrecaoResultado(jogo)">
+                      Corrigir resultado
+                    </button>
+                    <button type="button" class="secondary-button" (click)="abrirEditorCorrecaoSumula(jogo)" [disabled]="!podeRegistrarSumula()">
+                      Corrigir sumula
+                    </button>
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="panel sidebar-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Novo jogo</h2>
+          <span>POST /api/competicao/jogos</span>
+        </div>
+      </div>
+
+      @if (!podeCadastrarJogos()) {
+        <div class="feedback warning inline-feedback">
+          {{ tituloCadastroDependencias() }}
+        </div>
+      }
+
+      <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" class="form-grid">
+        <label class="full-width">
+          <span>Fase</span>
+          <select formControlName="faseId" (change)="atualizarDependenciasCadastro()">
+            <option [ngValue]="0">Selecione</option>
+            @for (fase of fases(); track trackByFase($index, fase)) {
+              <option [ngValue]="fase.id">{{ fase.nome }} · {{ fase.tipo }}</option>
+            }
+          </select>
+        </label>
+
+        @if (faseSelecionada()?.tipo === 'GRUPOS') {
+          <label class="full-width">
+            <span>Grupo</span>
+            <select formControlName="grupoId">
+              <option [ngValue]="0">Selecione</option>
+              @for (grupo of gruposDisponiveis(); track trackByGrupo($index, grupo)) {
+                <option [ngValue]="grupo.id">{{ grupo.nome }}</option>
+              }
+            </select>
+          </label>
+        }
+
+        <label class="full-width">
+          <span>Categoria</span>
+          <select formControlName="categoriaId" (change)="atualizarDependenciasCadastro()">
+            <option [ngValue]="0">Selecione</option>
+            @for (categoria of categorias(); track trackByCategoria($index, categoria)) {
+              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Atleta vermelho</span>
+          <select formControlName="atletaVermelhoId" (change)="atualizarDependenciasCadastro()">
+            <option [ngValue]="0">Selecione</option>
+            @for (atleta of atletasDisponiveis(); track trackByAtleta($index, atleta)) {
+              <option [ngValue]="atleta.id">{{ atleta.nome }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Atleta azul</span>
+          <select formControlName="atletaAzulId">
+            <option [ngValue]="0">Selecione</option>
+            @for (atleta of atletasDisponiveis(); track trackByAtleta($index, atleta)) {
+              @if (atleta.id !== cadastroForm.getRawValue().atletaVermelhoId) {
+                <option [ngValue]="atleta.id">{{ atleta.nome }}</option>
+              }
+            }
+          </select>
+        </label>
+
+        <label class="full-width">
+          <span>Data e hora</span>
+          <input type="datetime-local" formControlName="dataHora" />
+        </label>
+
+        @if (cadastroForm.controls.faseId.invalid && cadastroForm.controls.faseId.touched) {
+          <p class="field-error full-width">Selecione a fase.</p>
+        }
+
+        @if (cadastroForm.controls.categoriaId.invalid && cadastroForm.controls.categoriaId.touched) {
+          <p class="field-error full-width">Selecione a categoria.</p>
+        }
+
+        @if (cadastroForm.controls.atletaVermelhoId.invalid && cadastroForm.controls.atletaVermelhoId.touched) {
+          <p class="field-error full-width">Selecione o atleta vermelho.</p>
+        }
+
+        @if (cadastroForm.controls.atletaAzulId.invalid && cadastroForm.controls.atletaAzulId.touched) {
+          <p class="field-error full-width">Selecione o atleta azul.</p>
+        }
+
+        <button type="submit" [disabled]="savingCadastro() || !podeCadastrarJogos()">
+          {{ savingCadastro() ? 'Salvando...' : 'Criar jogo' }}
+        </button>
+      </form>
+
+      <div class="separator"></div>
+
+      <div class="panel-header">
+        <div>
+          <h2>Status operacional</h2>
+          <span>Base para resultado, sumula e correcoes</span>
+        </div>
+      </div>
+
+      <div class="summary-list">
+        <article>
+          <strong>AGENDADO</strong>
+          <p>Jogo pronto para ser iniciado pela operacao.</p>
+        </article>
+        <article>
+          <strong>EM_ANDAMENTO</strong>
+          <p>Jogo liberado para registro de resultado ou sumula.</p>
+        </article>
+        <article>
+          <strong>FINALIZADO</strong>
+          <p>Jogo encerrado com opcoes de correcao auditada.</p>
+        </article>
+      </div>
+
+      <div class="sidebar-note">
+        <strong>Endpoint ativo</strong>
+        <p>GET /api/competicao/jogos?campeonatoId=...</p>
+        <p>POST /api/competicao/jogos</p>
+        <p>PATCH /api/competicao/jogos/:id/iniciar</p>
+        <p>PATCH /api/competicao/jogos/:id/resultado</p>
+        <p>PUT /api/competicao/jogos/:id/sumula</p>
+        <p>POST /api/competicao/jogos/:id/correcoes/resultado</p>
+        <p>POST /api/competicao/jogos/:id/correcoes/sumula</p>
+      </div>
+
+      @if (jogoEmEdicao(); as jogo) {
+        <div class="editor-panel">
+          <div class="panel-header">
+            <div>
+              <h2>{{ tituloEditor() }}</h2>
+              <span>{{ jogo.atletaVermelho.nome }} x {{ jogo.atletaAzul.nome }}</span>
+            </div>
+            <button type="button" class="secondary-button" (click)="fecharEditor()">Fechar</button>
+          </div>
+
+          @if (modoCorrecao()) {
+            <form [formGroup]="correcaoForm" class="form-grid">
+              <label class="full-width">
+                <span>Motivo da correcao</span>
+                <textarea rows="3" formControlName="motivo"></textarea>
+              </label>
+            </form>
+          }
+
+          @if (modoResultado()) {
+            <form [formGroup]="resultadoForm" (ngSubmit)="modoCorrecao() ? corrigirResultado() : salvarResultado()" class="form-grid">
+              <label>
+                <span>Pontos vermelho</span>
+                <input type="number" min="0" formControlName="pontosVermelho" />
+              </label>
+
+              <label>
+                <span>Pontos azul</span>
+                <input type="number" min="0" formControlName="pontosAzul" />
+              </label>
+
+              <p class="helper full-width">
+                O vencedor sera calculado automaticamente a partir do placar. Em empate, a regra final depende do tipo de fase.
+              </p>
+
+              <button type="submit" [disabled]="jogoEmAcaoId() === jogo.id">
+                {{ jogoEmAcaoId() === jogo.id ? 'Salvando...' : (modoCorrecao() ? 'Salvar correcao' : 'Salvar resultado') }}
+              </button>
+            </form>
+          } @else {
+            @if (!podeRegistrarSumula()) {
+              <div class="feedback warning inline-feedback">
+                Cadastre ao menos 3 juizes neste campeonato antes de registrar ou corrigir a sumula.
+              </div>
+            } @else {
+              <form [formGroup]="sumulaForm" (ngSubmit)="modoCorrecao() ? corrigirSumula() : salvarSumula()" class="form-grid">
+                <label class="full-width">
+                  <span>Observacoes gerais</span>
+                  <textarea rows="3" formControlName="observacoes"></textarea>
+                </label>
+
+                <div class="judge-grid full-width">
+                  <article class="judge-card">
+                    <h3>Juiz 1</h3>
+                    <label>
+                      <span>Juiz</span>
+                      <select formControlName="juiz1Id">
+                        <option [ngValue]="0">Selecione</option>
+                        @for (juiz of juizes(); track trackByJuiz($index, juiz)) {
+                          <option [ngValue]="juiz.id">{{ juiz.nome }}</option>
+                        }
+                      </select>
+                    </label>
+                    <label>
+                      <span>Pontos vermelho</span>
+                      <input type="number" min="0" formControlName="juiz1PontosVermelho" />
+                    </label>
+                    <label>
+                      <span>Pontos azul</span>
+                      <input type="number" min="0" formControlName="juiz1PontosAzul" />
+                    </label>
+                    <label>
+                      <span>Observacoes</span>
+                      <input type="text" formControlName="juiz1Observacoes" />
+                    </label>
+                  </article>
+
+                  <article class="judge-card">
+                    <h3>Juiz 2</h3>
+                    <label>
+                      <span>Juiz</span>
+                      <select formControlName="juiz2Id">
+                        <option [ngValue]="0">Selecione</option>
+                        @for (juiz of juizes(); track trackByJuiz($index, juiz)) {
+                          <option [ngValue]="juiz.id">{{ juiz.nome }}</option>
+                        }
+                      </select>
+                    </label>
+                    <label>
+                      <span>Pontos vermelho</span>
+                      <input type="number" min="0" formControlName="juiz2PontosVermelho" />
+                    </label>
+                    <label>
+                      <span>Pontos azul</span>
+                      <input type="number" min="0" formControlName="juiz2PontosAzul" />
+                    </label>
+                    <label>
+                      <span>Observacoes</span>
+                      <input type="text" formControlName="juiz2Observacoes" />
+                    </label>
+                  </article>
+
+                  <article class="judge-card">
+                    <h3>Juiz 3</h3>
+                    <label>
+                      <span>Juiz</span>
+                      <select formControlName="juiz3Id">
+                        <option [ngValue]="0">Selecione</option>
+                        @for (juiz of juizes(); track trackByJuiz($index, juiz)) {
+                          <option [ngValue]="juiz.id">{{ juiz.nome }}</option>
+                        }
+                      </select>
+                    </label>
+                    <label>
+                      <span>Pontos vermelho</span>
+                      <input type="number" min="0" formControlName="juiz3PontosVermelho" />
+                    </label>
+                    <label>
+                      <span>Pontos azul</span>
+                      <input type="number" min="0" formControlName="juiz3PontosAzul" />
+                    </label>
+                    <label>
+                      <span>Observacoes</span>
+                      <input type="text" formControlName="juiz3Observacoes" />
+                    </label>
+                  </article>
+                </div>
+
+                <button type="submit" [disabled]="jogoEmAcaoId() === jogo.id">
+                  {{ jogoEmAcaoId() === jogo.id ? 'Salvando...' : (modoCorrecao() ? 'Salvar correcao' : 'Salvar sumula') }}
+                </button>
+              </form>
+            }
+          }
+        </div>
+      }
+    </article>
+  </section>
+}

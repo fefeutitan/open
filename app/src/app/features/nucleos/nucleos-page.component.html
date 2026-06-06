@@ -1,0 +1,127 @@
+<header class="page-header">
+  <div>
+    @if (campeonatoId(); as id) {
+      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
+    }
+    <p class="eyebrow">Cadastro operacional</p>
+    <h1>Nucleos</h1>
+    @if (campeonato(); as item) {
+      <p class="page-copy">Gerenciando nucleos vinculados a {{ item.nome }}.</p>
+    } @else {
+      <p class="page-copy">Lista e cadastro de nucleos por campeonato.</p>
+    }
+  </div>
+
+  @if (campeonato(); as item) {
+    <div class="header-context">
+      <strong>{{ item.nome }}</strong>
+      <span>{{ item.status }}</span>
+    </div>
+  }
+</header>
+
+@if (loading()) {
+  <section class="state-box">
+    <strong>Carregando nucleos...</strong>
+  </section>
+} @else if (error()) {
+  <section class="feedback error">
+    {{ error() }}
+  </section>
+} @else {
+  <section class="metrics" aria-label="Resumo de nucleos">
+    <article>
+      <span>Total cadastrados</span>
+      <strong>{{ totalNucleos() }}</strong>
+    </article>
+    <article>
+      <span>Com responsavel</span>
+      <strong>{{ nucleosComResponsavel() }}</strong>
+    </article>
+    <article>
+      <span>Endpoint</span>
+      <strong>/api/cadastros/nucleos</strong>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Lista de nucleos</h2>
+          <span>{{ totalNucleos() }} registro(s)</span>
+        </div>
+      </div>
+
+      @if (nucleos().length === 0) {
+        <div class="state-box inline-state">
+          <strong>Nenhum nucleo cadastrado</strong>
+          <p>Cadastre o primeiro nucleo deste campeonato no formulario ao lado.</p>
+        </div>
+      } @else {
+        <div class="list">
+          @for (nucleo of nucleos(); track trackByNucleo($index, nucleo)) {
+            <article class="list-item">
+              <div class="list-item-header">
+                <div>
+                  <h3>{{ nucleo.nome }}</h3>
+                  <p>{{ nucleo.cidade || 'Cidade nao informada' }}</p>
+                </div>
+                <span class="status-badge">{{ nucleo.responsavel ? 'COM RESPONSAVEL' : 'ABERTO' }}</span>
+              </div>
+
+              <dl class="meta-grid">
+                <div>
+                  <dt>Cidade</dt>
+                  <dd>{{ nucleo.cidade || 'Nao informada' }}</dd>
+                </div>
+                <div>
+                  <dt>Responsavel</dt>
+                  <dd>{{ nucleo.responsavel || 'Nao informado' }}</dd>
+                </div>
+                <div>
+                  <dt>Identificador</dt>
+                  <dd>#{{ nucleo.id }}</dd>
+                </div>
+              </dl>
+            </article>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="panel form-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Novo nucleo</h2>
+          <span>POST /api/cadastros/nucleos</span>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
+        <label class="full-width">
+          <span>Nome</span>
+          <input type="text" formControlName="nome" />
+        </label>
+
+        <label>
+          <span>Cidade</span>
+          <input type="text" formControlName="cidade" />
+        </label>
+
+        <label>
+          <span>Responsavel</span>
+          <input type="text" formControlName="responsavel" />
+        </label>
+
+        @if (form.controls.nome.invalid && form.controls.nome.touched) {
+          <p class="field-error full-width">Informe o nome do nucleo.</p>
+        }
+
+        <button type="submit" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar nucleo' }}
+        </button>
+      </form>
+    </article>
+  </section>
+}
