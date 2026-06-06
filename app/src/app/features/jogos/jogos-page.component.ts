@@ -83,15 +83,40 @@ export class JogosPageComponent implements OnInit {
     motivo: ['', [Validators.required, Validators.maxLength(1000)]]
   });
 
+  readonly filtroForm = this.formBuilder.nonNullable.group({
+    faseId: [0],
+    grupoId: [0],
+    categoriaId: [0],
+    data: ['']
+  });
+
   readonly jogosFiltrados = computed(() => {
     const filtro = this.statusFiltro();
-    const jogos = this.jogos();
+    const filtroAvancado = this.filtroForm.getRawValue();
+    let jogos = this.jogos();
 
-    if (filtro === 'TODOS') {
-      return jogos;
+    if (filtro !== 'TODOS') {
+      jogos = jogos.filter((jogo) => jogo.status === filtro);
     }
 
-    return jogos.filter((jogo) => jogo.status === filtro);
+    if (filtroAvancado.faseId > 0) {
+      jogos = jogos.filter((jogo) => jogo.fase.id === filtroAvancado.faseId);
+    }
+
+    if (filtroAvancado.grupoId > 0) {
+      jogos = jogos.filter((jogo) => jogo.grupo?.id === filtroAvancado.grupoId);
+    }
+
+    if (filtroAvancado.categoriaId > 0) {
+      jogos = jogos.filter((jogo) => jogo.categoria.id === filtroAvancado.categoriaId);
+    }
+
+    const dataFiltro = filtroAvancado.data.trim();
+    if (dataFiltro.length > 0) {
+      jogos = jogos.filter((jogo) => this.comecaNaData(jogo.dataHora, dataFiltro));
+    }
+
+    return jogos;
   });
 
   readonly totalJogos = computed(() => this.jogos().length);
@@ -131,6 +156,17 @@ export class JogosPageComponent implements OnInit {
   readonly podeCadastrarJogos = computed(() =>
     this.fases().length > 0 && this.categorias().length > 0 && this.atletas().length >= 2
   );
+  readonly faseFiltroSelecionada = computed(() =>
+    this.fases().find((fase) => fase.id === this.filtroForm.getRawValue().faseId) ?? null
+  );
+  readonly gruposDisponiveisFiltro = computed(() => {
+    const fase = this.faseFiltroSelecionada();
+    if (!fase || fase.tipo !== 'GRUPOS') {
+      return [] as GrupoItem[];
+    }
+
+    return this.gruposPorFase()[fase.id] ?? [];
+  });
 
   ngOnInit(): void {
     const campeonatoId = Number(this.route.snapshot.paramMap.get('id'));
@@ -192,6 +228,30 @@ export class JogosPageComponent implements OnInit {
     }
 
     this.carregarDados(campeonatoId, true);
+  }
+
+  atualizarFiltros(): void {
+    const fase = this.faseFiltroSelecionada();
+    const grupos = this.gruposDisponiveisFiltro();
+    const atual = this.filtroForm.getRawValue();
+
+    if (!fase || fase.tipo !== 'GRUPOS') {
+      this.filtroForm.patchValue({ grupoId: 0 });
+      return;
+    }
+
+    if (!grupos.some((grupo) => grupo.id === atual.grupoId)) {
+      this.filtroForm.patchValue({ grupoId: 0 });
+    }
+  }
+
+  limparFiltros(): void {
+    this.filtroForm.reset({
+      faseId: 0,
+      grupoId: 0,
+      categoriaId: 0,
+      data: ''
+    });
   }
 
   atualizarDependenciasCadastro(): void {
@@ -591,6 +651,38 @@ export class JogosPageComponent implements OnInit {
     return jogo.grupo ? `Grupo ${jogo.grupo.nome}` : null;
   }
 
+  resumoFiltros(): string {
+    const filtro = this.filtroForm.getRawValue();
+    const partes: string[] = [this.descricaoStatus(this.statusFiltro())];
+
+    if (filtro.faseId > 0) {
+      const fase = this.fases().find((item) => item.id === filtro.faseId);
+      if (fase) {
+        partes.push(`fase ${fase.nome}`);
+      }
+    }
+
+    if (filtro.grupoId > 0) {
+      const grupo = this.gruposDisponiveisFiltro().find((item) => item.id === filtro.grupoId);
+      if (grupo) {
+        partes.push(`grupo ${grupo.nome}`);
+      }
+    }
+
+    if (filtro.categoriaId > 0) {
+      const categoria = this.categorias().find((item) => item.id === filtro.categoriaId);
+      if (categoria) {
+        partes.push(`categoria ${categoria.nome}`);
+      }
+    }
+
+    if (filtro.data.trim().length > 0) {
+      partes.push(`data ${filtro.data}`);
+    }
+
+    return partes.join(' • ');
+  }
+
   tituloCadastroDependencias(): string {
     if (this.fases().length === 0) {
       return 'Cadastre ao menos uma fase antes de criar jogos.';
@@ -773,5 +865,21 @@ export class JogosPageComponent implements OnInit {
 
     const parsed = new Date(trimmed);
     return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+
+  private comecaNaData(dataHora: string | null, data: string): boolean {
+    if (!dataHora) {
+      return false;
+    }
+
+    const parsed = new Date(dataHora);
+    if (Number.isNaN(parsed.getTime())) {
+      return false;
+    }
+
+    const ano = parsed.getFullYear();
+    const mes = `${parsed.getMonth() + 1}`.padStart(2, '0');
+    const dia = `${parsed.getDate()}`.padStart(2, '0');
+    return `${ano}-${mes}-${dia}` === data;
   }
 }

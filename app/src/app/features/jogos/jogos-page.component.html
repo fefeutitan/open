@@ -53,7 +53,7 @@
       <div class="panel-header">
         <div>
           <h2>Fila de jogos</h2>
-          <span>{{ jogosFiltrados().length }} item(ns) em {{ descricaoStatus(statusFiltro()) }}</span>
+          <span>{{ jogosFiltrados().length }} item(ns) em {{ resumoFiltros() }}</span>
         </div>
         <button type="button" class="secondary-button" (click)="atualizar()" [disabled]="refreshing()">
           {{ refreshing() ? 'Atualizando...' : 'Atualizar' }}
@@ -66,6 +66,47 @@
         <button type="button" class="filter-button" [class.active]="statusFiltro() === 'EM_ANDAMENTO'" (click)="definirFiltro('EM_ANDAMENTO')">Em andamento</button>
         <button type="button" class="filter-button" [class.active]="statusFiltro() === 'FINALIZADO'" (click)="definirFiltro('FINALIZADO')">Finalizados</button>
       </div>
+
+      <form [formGroup]="filtroForm" class="filter-grid">
+        <label>
+          <span>Fase</span>
+          <select formControlName="faseId" (change)="atualizarFiltros()">
+            <option [ngValue]="0">Todas</option>
+            @for (fase of fases(); track trackByFase($index, fase)) {
+              <option [ngValue]="fase.id">{{ fase.nome }} - {{ fase.tipo }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Grupo</span>
+          <select formControlName="grupoId">
+            <option [ngValue]="0">Todos</option>
+            @for (grupo of gruposDisponiveisFiltro(); track trackByGrupo($index, grupo)) {
+              <option [ngValue]="grupo.id">{{ grupo.nome }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Categoria</span>
+          <select formControlName="categoriaId">
+            <option [ngValue]="0">Todas</option>
+            @for (categoria of categorias(); track trackByCategoria($index, categoria)) {
+              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Data</span>
+          <input type="date" formControlName="data" />
+        </label>
+
+        <div class="filter-actions">
+          <button type="button" class="secondary-button" (click)="limparFiltros()">Limpar filtros</button>
+        </div>
+      </form>
 
       @if (actionError()) {
         <div class="feedback error inline-feedback">

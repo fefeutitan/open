@@ -97,7 +97,8 @@
 }
 
 .filter-bar,
-.action-cluster {
+.action-cluster,
+.filter-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -105,6 +106,22 @@
 
 .filter-bar {
   margin-top: 18px;
+}
+
+.filter-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.filter-grid label {
+  display: grid;
+  gap: 8px;
+}
+
+.filter-actions {
+  align-items: end;
 }
 
 .filter-button,
@@ -295,7 +312,8 @@ button[disabled] {
 
   .metrics,
   .meta-grid,
-  .form-grid {
+  .form-grid,
+  .filter-grid {
     grid-template-columns: 1fr;
   }
 }
