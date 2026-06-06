@@ -30,6 +30,9 @@ export class AtletasPageComponent implements OnInit {
 
   readonly totalAtletas = computed(() => this.atletas().length);
   readonly atletasAtivos = computed(() => this.atletas().filter((atleta) => atleta.status === 'ATIVO').length);
+  readonly faltamCategorias = computed(() => this.categorias().length === 0);
+  readonly faltamNucleos = computed(() => this.nucleos().length === 0);
+  readonly formularioBloqueado = computed(() => this.faltamCategorias() || this.faltamNucleos());
 
   readonly form = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(120)]],
@@ -81,6 +84,11 @@ export class AtletasPageComponent implements OnInit {
 
     if (!campeonatoId) {
       this.error.set('Campeonato invalido para cadastro de atleta.');
+      return;
+    }
+
+    if (this.formularioBloqueado()) {
+      this.error.set('Cadastre categorias e nucleos antes de incluir atletas.');
       return;
     }
 

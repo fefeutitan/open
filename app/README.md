@@ -57,3 +57,39 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Como rodar esta aplicacao
+
+No projeto atual, o frontend Angular fica em `open/app`.
+
+Para subir e ver as telas:
+
+```powershell
+cd C:\Users\ferna\Desenv\eclipse-workspace\open\app
+npm start
+```
+
+Isso sobe o Angular em:
+
+- `http://localhost:4200`
+
+Como o frontend usa proxy para `/api`, o backend Spring precisa estar rodando em paralelo em `http://localhost:8080`.
+
+Para subir o backend em outro terminal, na raiz do projeto:
+
+```powershell
+cd C:\Users\ferna\Desenv\eclipse-workspace\open
+.\mvnw.cmd spring-boot:run
+```
+
+Se o wrapper der problema no seu ambiente, use Maven instalado:
+
+```powershell
+mvn spring-boot:run
+```
+
+Fluxo esperado:
+
+1. subir backend na pasta `open`
+2. subir frontend na pasta `open/app`
+3. abrir `http://localhost:4200`

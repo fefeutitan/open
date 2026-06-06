@@ -98,71 +98,82 @@
         </div>
       </div>
 
-      @if (categorias().length === 0 || nucleos().length === 0) {
+      @if (formularioBloqueado()) {
         <div class="feedback warning">
-          Cadastre categorias e nucleos neste campeonato antes de incluir atletas.
+          <strong>Cadastro de atleta bloqueado</strong>
+          <p>Preencha primeiro as dependencias deste campeonato para liberar o formulario.</p>
+          <div class="dependency-links">
+            @if (faltamCategorias()) {
+              <a [routerLink]="['/campeonatos', campeonatoId(), 'categorias']">Cadastrar categorias</a>
+            }
+            @if (faltamNucleos()) {
+              <a [routerLink]="['/campeonatos', campeonatoId(), 'nucleos']">Cadastrar nucleos</a>
+            }
+          </div>
         </div>
       }
 
       <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
-        <label>
-          <span>Nome</span>
-          <input type="text" formControlName="nome" />
-        </label>
+        <fieldset class="form-grid form-fieldset" [disabled]="formularioBloqueado()">
+          <label>
+            <span>Nome</span>
+            <input type="text" formControlName="nome" />
+          </label>
 
-        <label>
-          <span>Documento</span>
-          <input type="text" formControlName="documento" />
-        </label>
+          <label>
+            <span>Documento</span>
+            <input type="text" formControlName="documento" />
+          </label>
 
-        <label>
-          <span>Data de nascimento</span>
-          <input type="date" formControlName="dataNascimento" />
-        </label>
+          <label>
+            <span>Data de nascimento</span>
+            <input type="date" formControlName="dataNascimento" />
+          </label>
 
-        <label>
-          <span>Status</span>
-          <select formControlName="status">
-            <option value="ATIVO">ATIVO</option>
-            <option value="INATIVO">INATIVO</option>
-          </select>
-        </label>
+          <label>
+            <span>Status</span>
+            <select formControlName="status">
+              <option value="ATIVO">ATIVO</option>
+              <option value="INATIVO">INATIVO</option>
+            </select>
+          </label>
 
-        <label>
-          <span>Categoria</span>
-          <select formControlName="categoriaId">
-            <option [ngValue]="0">Selecione</option>
-            @for (categoria of categorias(); track categoria.id) {
-              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
-            }
-          </select>
-        </label>
+          <label>
+            <span>Categoria</span>
+            <select formControlName="categoriaId">
+              <option [ngValue]="0">Selecione</option>
+              @for (categoria of categorias(); track categoria.id) {
+                <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+              }
+            </select>
+          </label>
 
-        <label>
-          <span>Nucleo</span>
-          <select formControlName="nucleoId">
-            <option [ngValue]="0">Selecione</option>
-            @for (nucleo of nucleos(); track nucleo.id) {
-              <option [ngValue]="nucleo.id">{{ nucleo.nome }}</option>
-            }
-          </select>
-        </label>
+          <label>
+            <span>Nucleo</span>
+            <select formControlName="nucleoId">
+              <option [ngValue]="0">Selecione</option>
+              @for (nucleo of nucleos(); track nucleo.id) {
+                <option [ngValue]="nucleo.id">{{ nucleo.nome }}</option>
+              }
+            </select>
+          </label>
 
-        @if (form.controls.nome.invalid && form.controls.nome.touched) {
-          <p class="field-error full-width">Informe o nome do atleta.</p>
-        }
+          @if (form.controls.nome.invalid && form.controls.nome.touched) {
+            <p class="field-error full-width">Informe o nome do atleta.</p>
+          }
 
-        @if (form.controls.categoriaId.invalid && form.controls.categoriaId.touched) {
-          <p class="field-error full-width">Selecione uma categoria.</p>
-        }
+          @if (form.controls.categoriaId.invalid && form.controls.categoriaId.touched) {
+            <p class="field-error full-width">Selecione uma categoria.</p>
+          }
 
-        @if (form.controls.nucleoId.invalid && form.controls.nucleoId.touched) {
-          <p class="field-error full-width">Selecione um nucleo.</p>
-        }
+          @if (form.controls.nucleoId.invalid && form.controls.nucleoId.touched) {
+            <p class="field-error full-width">Selecione um nucleo.</p>
+          }
 
-        <button type="submit" [disabled]="saving() || categorias().length === 0 || nucleos().length === 0">
-          {{ saving() ? 'Salvando...' : 'Salvar atleta' }}
-        </button>
+          <button type="submit" [disabled]="saving() || formularioBloqueado()">
+            {{ saving() ? 'Salvando...' : 'Salvar atleta' }}
+          </button>
+        </fieldset>
       </form>
     </article>
   </section>
