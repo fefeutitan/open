@@ -106,7 +106,7 @@ Em termos de “terminar o sistema”, a diferenca entre um MVP e um produto pro
 
 ## ANALISE DE PENDENCIAS ANTERIORES
 
-Base: `ANALISE_PENDENCIAS_2026-04-20.md`, `ANALISE_PENDENCIAS_2026-04-22.md`, `ANALISE_PENDENCIAS_2026-04-23.md`.
+Base: `doc/ANALISE_PENDENCIAS_2026-04-20.md`, `doc/ANALISE_PENDENCIAS_2026-04-22.md`, `doc/ANALISE_PENDENCIAS_2026-04-23.md`.
 
 ### O que foi coberto desde 2026-04-20
 - **Fluxo de sumula com 3 juizes**: era pendencia em 2026-04-20 e foi entregue em 2026-04-22 (servico, repositorios, endpoints, DTOs e testes).
