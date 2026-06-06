@@ -15,6 +15,38 @@ export interface GrupoItem {
   nome: string;
 }
 
+export interface ClassificacaoAtletaItem {
+  atletaId: number;
+  atletaNome: string;
+  posicao: number;
+  jogos: number;
+  vitorias: number;
+  derrotas: number;
+  pontosClassificacao: number;
+  pontosMarcados: number;
+  pontosSofridos: number;
+  saldoPontos: number;
+}
+
+export interface EntidadeResumo {
+  id: number;
+  nome: string;
+}
+
+export interface JogoGeradoItem {
+  id: number;
+  fase: EntidadeResumo;
+  grupo: EntidadeResumo | null;
+  categoria: EntidadeResumo;
+  atletaVermelho: EntidadeResumo;
+  atletaAzul: EntidadeResumo;
+  dataHora: string | null;
+  status: 'AGENDADO' | 'EM_ANDAMENTO' | 'FINALIZADO';
+  vencedor: 'VERMELHO' | 'AZUL' | null;
+  pontosVermelho: number | null;
+  pontosAzul: number | null;
+}
+
 export interface FaseRequest {
   campeonatoId: number;
   nome: string;
@@ -26,6 +58,10 @@ export interface FaseRequest {
 export interface GrupoRequest {
   faseId: number;
   nome: string;
+}
+
+export interface GeracaoMataMataRequest {
+  faseEliminatoriaId: number;
 }
 
 @Injectable({
@@ -50,5 +86,13 @@ export class CompeticaoApiService {
 
   criarGrupo(payload: GrupoRequest): Observable<GrupoItem> {
     return this.http.post<GrupoItem>('/api/competicao/grupos', payload);
+  }
+
+  classificarGrupo(grupoId: number): Observable<ClassificacaoAtletaItem[]> {
+    return this.http.get<ClassificacaoAtletaItem[]>(`/api/competicao/grupos/${grupoId}/classificacao`);
+  }
+
+  gerarMataMata(faseGruposId: number, payload: GeracaoMataMataRequest): Observable<JogoGeradoItem[]> {
+    return this.http.post<JogoGeradoItem[]>(`/api/competicao/fases/${faseGruposId}/gerar-mata-mata`, payload);
   }
 }

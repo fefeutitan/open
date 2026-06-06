@@ -46,6 +46,10 @@
       <span>Total de grupos</span>
       <strong>{{ totalGrupos() }}</strong>
     </article>
+    <article>
+      <span>Atletas na classificacao</span>
+      <strong>{{ totalAtletasClassificados() }}</strong>
+    </article>
   </section>
 
   <section class="content-grid">
@@ -91,13 +95,72 @@
 
               @if (fase.tipo === 'GRUPOS') {
                 <div class="group-block">
-                  <strong>Grupos</strong>
+                  <div class="group-block-header">
+                    <strong>Grupos</strong>
+                    <button
+                      type="button"
+                      class="secondary-button"
+                      (click)="atualizarClassificacao()"
+                      [disabled]="refreshingClassificacao()"
+                    >
+                      {{ refreshingClassificacao() ? 'Atualizando...' : 'Atualizar classificacao' }}
+                    </button>
+                  </div>
+
+                  @if (classificacaoError()) {
+                    <div class="feedback warning inline-feedback">
+                      {{ classificacaoError() }}
+                    </div>
+                  }
+
                   @if (gruposDaFase(fase.id).length === 0) {
                     <p class="muted">Nenhum grupo cadastrado nesta fase.</p>
                   } @else {
                     <div class="chips">
                       @for (grupo of gruposDaFase(fase.id); track trackByGrupo($index, grupo)) {
                         <span>{{ grupo.nome }}</span>
+                      }
+                    </div>
+
+                    <div class="group-ranking-list">
+                      @for (grupo of gruposDaFase(fase.id); track trackByGrupo($index, grupo)) {
+                        <article class="ranking-card">
+                          <div class="ranking-card-header">
+                            <strong>{{ grupo.nome }}</strong>
+                            <span>{{ classificacaoDoGrupo(grupo.id).length }} atleta(s)</span>
+                          </div>
+
+                          @if (classificacaoDoGrupo(grupo.id).length === 0) {
+                            <p class="muted">Sem jogos finalizados suficientes para classificar este grupo.</p>
+                          } @else {
+                            <div class="ranking-table-wrapper">
+                              <table class="ranking-table">
+                                <thead>
+                                  <tr>
+                                    <th>Pos.</th>
+                                    <th>Atleta</th>
+                                    <th>Pts</th>
+                                    <th>V</th>
+                                    <th>D</th>
+                                    <th>Saldo</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (item of classificacaoDoGrupo(grupo.id); track trackByClassificacao($index, item)) {
+                                    <tr>
+                                      <td>{{ item.posicao }}</td>
+                                      <td>{{ item.atletaNome }}</td>
+                                      <td>{{ item.pontosClassificacao }}</td>
+                                      <td>{{ item.vitorias }}</td>
+                                      <td>{{ item.derrotas }}</td>
+                                      <td>{{ item.saldoPontos }}</td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            </div>
+                          }
+                        </article>
                       }
                     </div>
                   }
@@ -149,6 +212,90 @@
           {{ savingFase() ? 'Salvando...' : 'Salvar fase' }}
         </button>
       </form>
+
+      <div class="separator"></div>
+
+      <div class="panel-header">
+        <div>
+          <h2>Gerar mata-mata</h2>
+          <span>POST /api/competicao/fases/{{ '{' }}faseGruposId{{ '}' }}/gerar-mata-mata</span>
+        </div>
+      </div>
+
+      @if (!podeGerarMataMata()) {
+        <div class="feedback warning inline-feedback">
+          {{ descricaoBloqueioMataMata() }}
+        </div>
+      } @else {
+        <form [formGroup]="mataMataForm" (ngSubmit)="gerarMataMata()" class="form-grid">
+          <label class="full-width">
+            <span>Fase de grupos</span>
+            <select formControlName="faseGruposId">
+              <option [ngValue]="0">Selecione</option>
+              @for (fase of fasesDeGrupos(); track trackByFase($index, fase)) {
+                <option [ngValue]="fase.id">{{ fase.nome }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="full-width">
+            <span>Fase eliminatoria de destino</span>
+            <select formControlName="faseEliminatoriaId">
+              <option [ngValue]="0">Selecione</option>
+              @for (fase of fasesEliminatoriasDisponiveis(); track trackByFase($index, fase)) {
+                <option [ngValue]="fase.id">{{ fase.nome }}</option>
+              }
+            </select>
+          </label>
+
+          @if (faseGruposSelecionada(); as faseSelecionada) {
+            <div class="info-card full-width">
+              <strong>Origem selecionada</strong>
+              <p>
+                {{ faseSelecionada.nome }} com
+                {{ faseSelecionada.classificadosPorGrupo ?? '0' }}
+                classificado(s) por grupo.
+              </p>
+            </div>
+          }
+
+          @if (mataMataError()) {
+            <div class="feedback warning inline-feedback full-width">
+              {{ mataMataError() }}
+            </div>
+          }
+
+          @if (mataMataSuccess()) {
+            <div class="feedback success inline-feedback full-width">
+              {{ mataMataSuccess() }}
+            </div>
+          }
+
+          <button type="submit" [disabled]="generatingMataMata() || !!descricaoBloqueioMataMata()">
+            {{ generatingMataMata() ? 'Gerando...' : 'Gerar mata-mata' }}
+          </button>
+        </form>
+
+        @if (jogosGerados().length > 0) {
+          <div class="generated-block">
+            <div class="panel-header compact-header">
+              <div>
+                <h3>Confrontos gerados</h3>
+                <span>{{ jogosGerados().length }} jogo(s) criado(s)</span>
+              </div>
+            </div>
+
+            <div class="list compact-list">
+              @for (jogo of jogosGerados(); track trackByJogoGerado($index, jogo)) {
+                <article class="list-item compact-item">
+                  <strong>{{ confrontoGerado(jogo) }}</strong>
+                  <p>{{ jogo.fase.nome }} - {{ jogo.categoria.nome }}</p>
+                </article>
+              }
+            </div>
+          </div>
+        }
+      }
 
       <div class="separator"></div>
 
