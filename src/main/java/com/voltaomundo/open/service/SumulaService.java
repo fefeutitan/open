@@ -16,6 +16,8 @@ import com.voltaomundo.open.domain.LadoCompetidor;
 import com.voltaomundo.open.domain.StatusJogo;
 import com.voltaomundo.open.domain.Sumula;
 import com.voltaomundo.open.domain.TipoCorrecaoJogo;
+import com.voltaomundo.open.exception.BusinessRuleViolationException;
+import com.voltaomundo.open.exception.StateConflictException;
 import com.voltaomundo.open.repository.AvaliacaoJuizRepository;
 import com.voltaomundo.open.repository.CorrecaoJogoRepository;
 import com.voltaomundo.open.repository.JogoRepository;
@@ -50,7 +52,7 @@ public class SumulaService {
     public SumulaJogoResponse buscarPorJogo(Long jogoId) {
         Jogo jogo = lookupService.jogo(jogoId);
         Sumula sumula = sumulaRepository.findByJogoId(jogoId)
-                .orElseThrow(() -> new IllegalArgumentException("Sumula nao encontrada para o jogo: " + jogoId));
+                .orElseThrow(() -> new BusinessRuleViolationException("Sumula nao encontrada para o jogo: " + jogoId));
 
         List<AvaliacaoJuiz> avaliacoes = avaliacaoJuizRepository.findBySumulaId(sumula.getId());
         return toResponse(sumula, jogo, avaliacoes);
@@ -60,7 +62,7 @@ public class SumulaService {
     public SumulaJogoResponse registrar(Long jogoId, SumulaJogoRequest request) {
         Jogo jogo = lookupService.jogo(jogoId);
         if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
-            throw new IllegalArgumentException("Sumula so pode ser registrada para jogo em andamento.");
+            throw new StateConflictException("Sumula so pode ser registrada para jogo em andamento.");
         }
         return registrarAvaliacoes(jogoId, request, jogo);
     }
@@ -69,7 +71,7 @@ public class SumulaService {
     public CorrecaoJogo corrigir(Long jogoId, String motivo, SumulaJogoRequest request) {
         Jogo jogo = lookupService.jogo(jogoId);
         if (jogo.getStatus() != StatusJogo.FINALIZADO) {
-            throw new IllegalArgumentException("Somente jogos finalizados podem ser corrigidos.");
+            throw new StateConflictException("Somente jogos finalizados podem ser corrigidos.");
         }
 
         String detalheAnterior = detalheSumula(jogoId, jogo);
@@ -87,7 +89,7 @@ public class SumulaService {
 
     private SumulaJogoResponse registrarAvaliacoes(Long jogoId, SumulaJogoRequest request, Jogo jogo) {
         if (request.avaliacoes() == null || request.avaliacoes().size() != 3) {
-            throw new IllegalArgumentException("A sumula precisa conter exatamente 3 avaliacoes.");
+            throw new BusinessRuleViolationException("A sumula precisa conter exatamente 3 avaliacoes.");
         }
 
         Set<Long> juizIds = new HashSet<>();
@@ -99,18 +101,19 @@ public class SumulaService {
 
         for (AvaliacaoJuizRequest avaliacaoRequest : request.avaliacoes()) {
             if (!juizIds.add(avaliacaoRequest.juizId())) {
-                throw new IllegalArgumentException("Cada avaliacao precisa usar um juiz diferente.");
+                throw new BusinessRuleViolationException("Cada avaliacao precisa usar um juiz diferente.");
             }
 
             if (avaliacaoRequest.pontosVermelho().equals(avaliacaoRequest.pontosAzul())) {
-                throw new IllegalArgumentException("Cada avaliacao precisa indicar um vencedor.");
+                throw new BusinessRuleViolationException("Cada avaliacao precisa indicar um vencedor.");
             }
 
             Juiz juiz = lookupService.juiz(avaliacaoRequest.juizId());
             Long campeonatoJuizId = juiz.getCampeonato().getId();
             Long campeonatoJogoId = jogo.getFase().getCampeonato().getId();
             if (!campeonatoJuizId.equals(campeonatoJogoId)) {
-                throw new IllegalArgumentException("Todos os juizes devem pertencer ao mesmo campeonato do jogo.");
+                throw new BusinessRuleViolationException(
+                        "Todos os juizes devem pertencer ao mesmo campeonato do jogo.");
             }
 
             totalVermelho += avaliacaoRequest.pontosVermelho();

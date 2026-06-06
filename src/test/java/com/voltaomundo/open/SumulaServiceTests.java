@@ -24,6 +24,8 @@ import com.voltaomundo.open.domain.StatusCampeonato;
 import com.voltaomundo.open.domain.StatusJogo;
 import com.voltaomundo.open.domain.TipoFase;
 import com.voltaomundo.open.domain.TipoCorrecaoJogo;
+import com.voltaomundo.open.exception.BusinessRuleViolationException;
+import com.voltaomundo.open.exception.StateConflictException;
 import com.voltaomundo.open.repository.AtletaRepository;
 import com.voltaomundo.open.repository.CampeonatoRepository;
 import com.voltaomundo.open.repository.CategoriaRepository;
@@ -101,7 +103,7 @@ class SumulaServiceTests {
                         new AvaliacaoJuizRequest(contexto.juiz1().getId(), 10, 8, null),
                         new AvaliacaoJuizRequest(contexto.juiz1().getId(), 9, 10, null),
                         new AvaliacaoJuizRequest(contexto.juiz3().getId(), 10, 9, null)))))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("juiz diferente");
     }
 
@@ -117,7 +119,7 @@ class SumulaServiceTests {
                         new AvaliacaoJuizRequest(contexto.juiz1().getId(), 10, 8, null),
                         new AvaliacaoJuizRequest(contexto.juiz2().getId(), 9, 10, null),
                         new AvaliacaoJuizRequest(contexto.juiz3().getId(), 10, 9, null)))))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(StateConflictException.class)
                 .hasMessageContaining("em andamento");
     }
 

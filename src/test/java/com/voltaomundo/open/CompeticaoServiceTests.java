@@ -24,6 +24,8 @@ import com.voltaomundo.open.domain.StatusJogo;
 import com.voltaomundo.open.domain.StatusAtleta;
 import com.voltaomundo.open.domain.TipoCorrecaoJogo;
 import com.voltaomundo.open.domain.TipoFase;
+import com.voltaomundo.open.exception.BusinessRuleViolationException;
+import com.voltaomundo.open.exception.StateConflictException;
 import com.voltaomundo.open.repository.AtletaRepository;
 import com.voltaomundo.open.repository.CampeonatoRepository;
 import com.voltaomundo.open.repository.CategoriaRepository;
@@ -34,6 +36,7 @@ import com.voltaomundo.open.repository.JogoRepository;
 import com.voltaomundo.open.repository.NucleoRepository;
 import com.voltaomundo.open.service.CompeticaoService;
 import com.voltaomundo.open.web.dto.ClassificacaoAtletaDto;
+import com.voltaomundo.open.web.dto.JogoRequest;
 import com.voltaomundo.open.web.dto.ResultadoJogoRequest;
 
 @SpringBootTest
@@ -221,7 +224,7 @@ class CompeticaoServiceTests {
         assertThatThrownBy(() -> competicaoService.registrarResultado(
                 jogo.getId(),
                 new ResultadoJogoRequest(10, 8, LadoCompetidor.VERMELHO)))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(StateConflictException.class)
                 .hasMessageContaining("em andamento");
 
         competicaoService.iniciarJogo(jogo.getId());
@@ -230,8 +233,61 @@ class CompeticaoServiceTests {
         assertThatThrownBy(() -> competicaoService.registrarResultado(
                 jogo.getId(),
                 new ResultadoJogoRequest(10, 8, LadoCompetidor.VERMELHO)))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(StateConflictException.class)
                 .hasMessageContaining("em andamento");
+    }
+
+    @Test
+    void deveRejeitarCriacaoDeJogoComAtletasDaCategoriaErrada() {
+        Campeonato campeonato = campeonato("Open VM");
+        Categoria adulto = categoria(campeonato, "Adulto");
+        Categoria juvenil = categoria(campeonato, "Juvenil");
+        Nucleo nucleo = nucleo(campeonato, "Nucleo A");
+        Atleta atleta1 = atleta("Atleta 1", adulto, nucleo);
+        Atleta atleta2 = atleta("Atleta 2", juvenil, nucleo);
+        Fase fase = fase(campeonato, "Grupos", TipoFase.GRUPOS, 1, 2);
+
+        assertThatThrownBy(() -> competicaoService.criarJogo(
+                new JogoRequest(fase.getId(), null, adulto.getId(), atleta1.getId(), atleta2.getId(), null)))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("categoria informada");
+    }
+
+    @Test
+    void deveRejeitarCriacaoDeJogoComGrupoDeOutraFase() {
+        Campeonato campeonato = campeonato("Open VM");
+        Categoria categoria = categoria(campeonato, "Adulto");
+        Nucleo nucleo = nucleo(campeonato, "Nucleo A");
+        Atleta atleta1 = atleta("Atleta 1", categoria, nucleo);
+        Atleta atleta2 = atleta("Atleta 2", categoria, nucleo);
+        Fase faseA = fase(campeonato, "Grupos A", TipoFase.GRUPOS, 1, 2);
+        Fase faseB = fase(campeonato, "Grupos B", TipoFase.GRUPOS, 2, 2);
+        Grupo grupoDeOutraFase = grupo(faseB, "B");
+
+        assertThatThrownBy(() -> competicaoService.criarJogo(
+                new JogoRequest(
+                        faseA.getId(),
+                        grupoDeOutraFase.getId(),
+                        categoria.getId(),
+                        atleta1.getId(),
+                        atleta2.getId(),
+                        null)))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("Grupo precisa pertencer");
+    }
+
+    @Test
+    void deveRejeitarCriacaoDeJogoComMesmoAtletaNosDoisLados() {
+        Campeonato campeonato = campeonato("Open VM");
+        Categoria categoria = categoria(campeonato, "Adulto");
+        Nucleo nucleo = nucleo(campeonato, "Nucleo A");
+        Atleta atleta1 = atleta("Atleta 1", categoria, nucleo);
+        Fase fase = fase(campeonato, "Grupos", TipoFase.GRUPOS, 1, 2);
+
+        assertThatThrownBy(() -> competicaoService.criarJogo(
+                new JogoRequest(fase.getId(), null, categoria.getId(), atleta1.getId(), atleta1.getId(), null)))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("dois atletas diferentes");
     }
 
     @Test

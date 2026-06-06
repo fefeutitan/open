@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.voltaomundo.open.domain.Atleta;
+import com.voltaomundo.open.domain.Categoria;
 import com.voltaomundo.open.domain.CorrecaoJogo;
 import com.voltaomundo.open.domain.Fase;
 import com.voltaomundo.open.domain.Grupo;
@@ -18,6 +19,8 @@ import com.voltaomundo.open.domain.LadoCompetidor;
 import com.voltaomundo.open.domain.StatusJogo;
 import com.voltaomundo.open.domain.TipoCorrecaoJogo;
 import com.voltaomundo.open.domain.TipoFase;
+import com.voltaomundo.open.exception.BusinessRuleViolationException;
+import com.voltaomundo.open.exception.StateConflictException;
 import com.voltaomundo.open.repository.CorrecaoJogoRepository;
 import com.voltaomundo.open.repository.FaseRepository;
 import com.voltaomundo.open.repository.GrupoRepository;
@@ -67,12 +70,20 @@ public class CompeticaoService {
     }
 
     public Jogo criarJogo(JogoRequest request) {
+        Fase fase = lookupService.fase(request.faseId());
+        Grupo grupo = request.grupoId() == null ? null : lookupService.grupo(request.grupoId());
+        Categoria categoria = lookupService.categoria(request.categoriaId());
+        Atleta atletaVermelho = lookupService.atleta(request.atletaVermelhoId());
+        Atleta atletaAzul = lookupService.atleta(request.atletaAzulId());
+
+        validarCriacaoJogo(fase, grupo, categoria, atletaVermelho, atletaAzul);
+
         Jogo jogo = new Jogo();
-        jogo.setFase(lookupService.fase(request.faseId()));
-        jogo.setGrupo(request.grupoId() == null ? null : lookupService.grupo(request.grupoId()));
-        jogo.setCategoria(lookupService.categoria(request.categoriaId()));
-        jogo.setAtletaVermelho(lookupService.atleta(request.atletaVermelhoId()));
-        jogo.setAtletaAzul(lookupService.atleta(request.atletaAzulId()));
+        jogo.setFase(fase);
+        jogo.setGrupo(grupo);
+        jogo.setCategoria(categoria);
+        jogo.setAtletaVermelho(atletaVermelho);
+        jogo.setAtletaAzul(atletaAzul);
         jogo.setDataHora(request.dataHora());
         return jogoRepository.save(jogo);
     }
@@ -81,7 +92,7 @@ public class CompeticaoService {
     public Jogo iniciarJogo(Long jogoId) {
         Jogo jogo = lookupService.jogo(jogoId);
         if (jogo.getStatus() != StatusJogo.AGENDADO) {
-            throw new IllegalArgumentException("Somente jogos agendados podem ser iniciados.");
+            throw new StateConflictException("Somente jogos agendados podem ser iniciados.");
         }
         jogo.setStatus(StatusJogo.EM_ANDAMENTO);
         return jogoRepository.save(jogo);
@@ -91,7 +102,7 @@ public class CompeticaoService {
     public Jogo registrarResultado(Long jogoId, ResultadoJogoRequest request) {
         Jogo jogo = lookupService.jogo(jogoId);
         if (jogo.getStatus() != StatusJogo.EM_ANDAMENTO) {
-            throw new IllegalArgumentException("Resultado so pode ser registrado para jogo em andamento.");
+            throw new StateConflictException("Resultado so pode ser registrado para jogo em andamento.");
         }
         validarResultadoPorTipoFase(jogo, request);
         jogo.setPontosVermelho(request.pontosVermelho());
@@ -111,7 +122,7 @@ public class CompeticaoService {
     public CorrecaoJogo corrigirResultado(Long jogoId, String motivo, ResultadoJogoRequest request) {
         Jogo jogo = lookupService.jogo(jogoId);
         if (jogo.getStatus() != StatusJogo.FINALIZADO) {
-            throw new IllegalArgumentException("Somente jogos finalizados podem ser corrigidos.");
+            throw new StateConflictException("Somente jogos finalizados podem ser corrigidos.");
         }
 
         validarResultadoPorTipoFase(jogo, request);
@@ -136,7 +147,7 @@ public class CompeticaoService {
 
     @Transactional(readOnly = true)
     public List<ClassificacaoAtletaDto> classificarGrupo(Long grupoId) {
-        Grupo grupo = lookupService.grupo(grupoId);
+        lookupService.grupo(grupoId);
         List<Jogo> jogos = jogoRepository.findByGrupoId(grupoId);
         return calcularClassificacao(jogos);
     }
@@ -147,19 +158,20 @@ public class CompeticaoService {
         Fase faseEliminatoria = lookupService.fase(faseEliminatoriaId);
 
         if (faseGrupos.getTipo() != TipoFase.GRUPOS) {
-            throw new IllegalArgumentException("A fase de origem precisa ser do tipo GRUPOS.");
+            throw new BusinessRuleViolationException("A fase de origem precisa ser do tipo GRUPOS.");
         }
         if (faseEliminatoria.getTipo() != TipoFase.ELIMINATORIA) {
-            throw new IllegalArgumentException("A fase de destino precisa ser do tipo ELIMINATORIA.");
+            throw new BusinessRuleViolationException("A fase de destino precisa ser do tipo ELIMINATORIA.");
         }
         if (!faseGrupos.getCampeonato().getId().equals(faseEliminatoria.getCampeonato().getId())) {
-            throw new IllegalArgumentException("As fases precisam pertencer ao mesmo campeonato.");
+            throw new BusinessRuleViolationException("As fases precisam pertencer ao mesmo campeonato.");
         }
         if (faseGrupos.getClassificadosPorGrupo() == null || faseGrupos.getClassificadosPorGrupo() < 1) {
-            throw new IllegalArgumentException("A fase de grupos precisa definir quantos atletas classificam por grupo.");
+            throw new BusinessRuleViolationException(
+                    "A fase de grupos precisa definir quantos atletas classificam por grupo.");
         }
         if (!jogoRepository.findByFaseId(faseEliminatoriaId).isEmpty()) {
-            throw new IllegalArgumentException("A fase eliminatória já possui jogos cadastrados.");
+            throw new StateConflictException("A fase eliminatoria ja possui jogos cadastrados.");
         }
 
         List<Grupo> grupos = grupoRepository.findByFaseId(faseGruposId);
@@ -174,7 +186,8 @@ public class CompeticaoService {
         }
 
         if (classificados.size() < 2 || classificados.size() % 2 != 0) {
-            throw new IllegalArgumentException("A quantidade de classificados precisa ser par e maior que 1.");
+            throw new BusinessRuleViolationException(
+                    "A quantidade de classificados precisa ser par e maior que 1.");
         }
 
         List<Jogo> jogosGerados = new ArrayList<>();
@@ -265,20 +278,38 @@ public class CompeticaoService {
 
         if (empate) {
             if (request.vencedor() != null) {
-                throw new IllegalArgumentException("Resultado empatado nao pode informar vencedor.");
+                throw new BusinessRuleViolationException("Resultado empatado nao pode informar vencedor.");
             }
             return;
         }
 
         if (request.vencedor() == null) {
-            throw new IllegalArgumentException("Resultado com pontuacao diferente precisa informar vencedor.");
+            throw new BusinessRuleViolationException("Resultado com pontuacao diferente precisa informar vencedor.");
         }
 
         if (request.pontosVermelho() > request.pontosAzul() && request.vencedor() != LadoCompetidor.VERMELHO) {
-            throw new IllegalArgumentException("Vencedor informado nao confere com a pontuacao.");
+            throw new BusinessRuleViolationException("Vencedor informado nao confere com a pontuacao.");
         }
         if (request.pontosAzul() > request.pontosVermelho() && request.vencedor() != LadoCompetidor.AZUL) {
-            throw new IllegalArgumentException("Vencedor informado nao confere com a pontuacao.");
+            throw new BusinessRuleViolationException("Vencedor informado nao confere com a pontuacao.");
+        }
+    }
+
+    private void validarCriacaoJogo(Fase fase, Grupo grupo, Categoria categoria, Atleta atletaVermelho,
+            Atleta atletaAzul) {
+        if (!fase.getCampeonato().getId().equals(categoria.getCampeonato().getId())) {
+            throw new BusinessRuleViolationException("Fase e categoria precisam pertencer ao mesmo campeonato.");
+        }
+        if (grupo != null && !grupo.getFase().getId().equals(fase.getId())) {
+            throw new BusinessRuleViolationException("Grupo precisa pertencer a fase informada.");
+        }
+        if (atletaVermelho.getId().equals(atletaAzul.getId())) {
+            throw new BusinessRuleViolationException("O jogo precisa ter dois atletas diferentes.");
+        }
+        if (!atletaVermelho.getCategoria().getId().equals(categoria.getId())
+                || !atletaAzul.getCategoria().getId().equals(categoria.getId())) {
+            throw new BusinessRuleViolationException(
+                    "Os atletas precisam pertencer a categoria informada para o jogo.");
         }
     }
 

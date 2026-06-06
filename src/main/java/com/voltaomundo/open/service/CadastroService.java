@@ -6,6 +6,7 @@ import com.voltaomundo.open.domain.Atleta;
 import com.voltaomundo.open.domain.Categoria;
 import com.voltaomundo.open.domain.Juiz;
 import com.voltaomundo.open.domain.Nucleo;
+import com.voltaomundo.open.exception.BusinessRuleViolationException;
 import com.voltaomundo.open.repository.AtletaRepository;
 import com.voltaomundo.open.repository.CategoriaRepository;
 import com.voltaomundo.open.repository.JuizRepository;
@@ -58,13 +59,17 @@ public class CadastroService {
     }
 
     public Atleta criarAtleta(AtletaRequest request) {
+        Categoria categoria = lookupService.categoria(request.categoriaId());
+        Nucleo nucleo = lookupService.nucleo(request.nucleoId());
+        validarMesmoCampeonato(categoria, nucleo);
+
         Atleta atleta = new Atleta();
         atleta.setNome(request.nome());
         atleta.setDocumento(request.documento());
         atleta.setDataNascimento(request.dataNascimento());
         atleta.setStatus(request.status());
-        atleta.setCategoria(lookupService.categoria(request.categoriaId()));
-        atleta.setNucleo(lookupService.nucleo(request.nucleoId()));
+        atleta.setCategoria(categoria);
+        atleta.setNucleo(nucleo);
         return atletaRepository.save(atleta);
     }
 
@@ -74,5 +79,12 @@ public class CadastroService {
         juiz.setNome(request.nome());
         juiz.setRegistro(request.registro());
         return juizRepository.save(juiz);
+    }
+
+    private void validarMesmoCampeonato(Categoria categoria, Nucleo nucleo) {
+        if (!categoria.getCampeonato().getId().equals(nucleo.getCampeonato().getId())) {
+            throw new BusinessRuleViolationException(
+                    "Categoria e nucleo precisam pertencer ao mesmo campeonato.");
+        }
     }
 }
