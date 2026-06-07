@@ -2,7 +2,32 @@
   box-sizing: border-box;
 }
 
+html {
+  color-scheme: light;
+}
+
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  background: #eef5f7;
+  color: #14222b;
+  font-family: "Segoe UI Variable Display", "Trebuchet MS", Verdana, sans-serif;
+}
+
+:root {
+  --ink-900: #15303a;
+  --ink-700: #35545f;
+  --panel-edge: #d7e4e8;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
 }

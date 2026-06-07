@@ -1,23 +1,57 @@
 <main class="app-shell">
   <aside class="sidebar" aria-label="Navegacao principal">
-    <div class="brand">
-      <span class="brand-mark">OV</span>
-      <div>
+    <div class="brand-card">
+      <img class="brand-logo" src="icon-openvm.svg" alt="Open Volta ao Mundo" />
+      <div class="brand-copy">
         <strong>Open VM</strong>
-        <span>Competicao</span>
+        <span>Monitoramento e operacao do campeonato</span>
       </div>
     </div>
 
     <nav class="nav-list">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Painel</a>
-      <a routerLink="/campeonatos" routerLinkActive="active">Campeonatos</a>
-      <a href="#">Atletas</a>
-      <a href="#">Jogos</a>
-      <a href="#">Sumulas</a>
+      <a
+        class="nav-link"
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="nav-icon">◫</span>
+        <span>
+          <strong>Painel</strong>
+          <small>Fila e pendencias</small>
+        </span>
+      </a>
+
+      <a class="nav-link" routerLink="/campeonatos" routerLinkActive="active">
+        <span class="nav-icon">◎</span>
+        <span>
+          <strong>Campeonatos</strong>
+          <small>Cadastros e contexto</small>
+        </span>
+      </a>
     </nav>
+
+    <div class="sidebar-note">
+      <span class="sidebar-label">Direcao visual</span>
+      <p>Inspirado em paineis institucionais de monitoramento: navegacao lateral, superficie clara e leitura tecnica.</p>
+    </div>
   </aside>
 
   <section class="workspace">
-    <router-outlet />
+    <header class="workspace-topbar">
+      <div>
+        <p class="topbar-label">{{ currentSection() }}</p>
+        <h1>Open Volta ao Mundo</h1>
+      </div>
+
+      <div class="topbar-meta">
+        <span class="meta-pill">Operacao guiada</span>
+        <span class="meta-date">{{ currentDateLabel }}</span>
+      </div>
+    </header>
+
+    <div class="workspace-surface">
+      <router-outlet />
+    </div>
   </section>
 </main>
