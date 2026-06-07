@@ -18,13 +18,9 @@
 </header>
 
 @if (loading()) {
-  <section class="state-box">
-    <strong>Carregando campeonato...</strong>
-  </section>
+  <app-ui-empty-state title="Carregando campeonato..." />
 } @else if (error()) {
-  <section class="feedback error">
-    {{ error() }}
-  </section>
+  <app-ui-feedback tone="error" [message]="error()!" />
 } @else if (campeonato(); as item) {
   <section class="hero-grid">
     <article class="hero-panel">

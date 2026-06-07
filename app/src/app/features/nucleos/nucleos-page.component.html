@@ -21,13 +21,9 @@
 </header>
 
 @if (loading()) {
-  <section class="state-box">
-    <strong>Carregando nucleos...</strong>
-  </section>
+  <app-ui-empty-state title="Carregando nucleos..." />
 } @else if (error()) {
-  <section class="feedback error">
-    {{ error() }}
-  </section>
+  <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
   <section class="metrics" aria-label="Resumo de nucleos">
     <article>
@@ -54,10 +50,11 @@
       </div>
 
       @if (nucleos().length === 0) {
-        <div class="state-box inline-state">
-          <strong>Nenhum nucleo cadastrado</strong>
-          <p>Cadastre o primeiro nucleo deste campeonato no formulario ao lado.</p>
-        </div>
+        <app-ui-empty-state
+          [inline]="true"
+          title="Nenhum nucleo cadastrado"
+          message="Cadastre o primeiro nucleo deste campeonato no formulario ao lado."
+        />
       } @else {
         <div class="list">
           @for (nucleo of nucleos(); track trackByNucleo($index, nucleo)) {

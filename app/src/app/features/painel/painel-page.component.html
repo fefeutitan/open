@@ -18,9 +18,7 @@
 </header>
 
 @if (error()) {
-  <section class="feedback error">
-    {{ error() }}
-  </section>
+  <app-ui-feedback tone="error" [message]="error()!" />
 }
 
 <section class="filters-panel">
@@ -78,24 +76,22 @@
     </div>
 
     @if (loadingCampeonatos() || loadingJogos()) {
-      <div class="empty-state">
-        <strong>Carregando fila operacional...</strong>
-      </div>
+      <app-ui-empty-state title="Carregando fila operacional..." />
     } @else if (campeonatos().length === 0) {
-      <div class="empty-state">
-        <strong>Nenhum campeonato cadastrado</strong>
-        <p>Cadastre um campeonato para habilitar o painel.</p>
-      </div>
+      <app-ui-empty-state
+        title="Nenhum campeonato cadastrado"
+        message="Cadastre um campeonato para habilitar o painel."
+      />
     } @else if (!campeonatoSelecionado()) {
-      <div class="empty-state">
-        <strong>Selecione um campeonato</strong>
-        <p>O painel usa um campeonato por vez para consolidar jogos e pendencias.</p>
-      </div>
+      <app-ui-empty-state
+        title="Selecione um campeonato"
+        message="O painel usa um campeonato por vez para consolidar jogos e pendencias."
+      />
     } @else if (filaOperacional().length === 0) {
-      <div class="empty-state">
-        <strong>Nenhum jogo operacional encontrado</strong>
-        <p>Crie jogos ou acompanhe os finalizados na tela detalhada do campeonato.</p>
-      </div>
+      <app-ui-empty-state
+        title="Nenhum jogo operacional encontrado"
+        message="Crie jogos ou acompanhe os finalizados na tela detalhada do campeonato."
+      />
     } @else {
       <div class="queue-list">
         @for (jogo of filaOperacional(); track trackByJogo($index, jogo)) {

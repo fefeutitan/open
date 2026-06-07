@@ -32,14 +32,12 @@
     </div>
 
     @if (loading()) {
-      <div class="state-box">
-        <strong>Carregando campeonatos...</strong>
-      </div>
+      <app-ui-empty-state title="Carregando campeonatos..." />
     } @else if (campeonatos().length === 0) {
-      <div class="state-box">
-        <strong>Nenhum campeonato cadastrado</strong>
-        <p>Use o formulario ao lado para registrar o primeiro evento.</p>
-      </div>
+      <app-ui-empty-state
+        title="Nenhum campeonato cadastrado"
+        message="Use o formulario ao lado para registrar o primeiro evento."
+      />
     } @else {
       <div class="list">
         @for (campeonato of campeonatos(); track trackByCampeonato($index, campeonato)) {
@@ -126,9 +124,7 @@
     </form>
 
     @if (error()) {
-      <div class="feedback error">
-        {{ error() }}
-      </div>
+      <app-ui-feedback tone="error" [message]="error()!" />
     }
   </article>
 </section>

@@ -3,13 +3,15 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
+import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import { CadastroApiService, CategoriaResumo } from '../atletas/cadastro-api.service';
 
 @Component({
   selector: 'app-categorias-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
   templateUrl: './categorias-page.component.html',
   styleUrl: './categorias-page.component.scss'
 })

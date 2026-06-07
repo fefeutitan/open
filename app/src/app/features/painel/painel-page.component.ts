@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
+import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import { JogoItem, JogosApiService } from '../jogos/jogos-api.service';
 
 @Component({
   selector: 'app-painel-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
   templateUrl: './painel-page.component.html',
   styleUrl: './painel-page.component.scss'
 })

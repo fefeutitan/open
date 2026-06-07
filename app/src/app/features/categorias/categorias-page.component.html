@@ -21,13 +21,9 @@
 </header>
 
 @if (loading()) {
-  <section class="state-box">
-    <strong>Carregando categorias...</strong>
-  </section>
+  <app-ui-empty-state title="Carregando categorias..." />
 } @else if (error()) {
-  <section class="feedback error">
-    {{ error() }}
-  </section>
+  <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
   <section class="metrics" aria-label="Resumo de categorias">
     <article>
@@ -54,10 +50,11 @@
       </div>
 
       @if (categorias().length === 0) {
-        <div class="state-box inline-state">
-          <strong>Nenhuma categoria cadastrada</strong>
-          <p>Cadastre a primeira categoria deste campeonato no formulario ao lado.</p>
-        </div>
+        <app-ui-empty-state
+          [inline]="true"
+          title="Nenhuma categoria cadastrada"
+          message="Cadastre a primeira categoria deste campeonato no formulario ao lado."
+        />
       } @else {
         <div class="list">
           @for (categoria of categorias(); track trackByCategoria($index, categoria)) {

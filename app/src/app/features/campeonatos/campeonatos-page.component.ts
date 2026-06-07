@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
+import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { Campeonato, CampeonatoApiService } from './campeonato-api.service';
 
 @Component({
   selector: 'app-campeonatos-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
   templateUrl: './campeonatos-page.component.html',
   styleUrl: './campeonatos-page.component.scss'
 })

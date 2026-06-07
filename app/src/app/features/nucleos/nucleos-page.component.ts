@@ -3,13 +3,15 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
+import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { CadastroApiService, NucleoResumo } from '../atletas/cadastro-api.service';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 
 @Component({
   selector: 'app-nucleos-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
   templateUrl: './nucleos-page.component.html',
   styleUrl: './nucleos-page.component.scss'
 })

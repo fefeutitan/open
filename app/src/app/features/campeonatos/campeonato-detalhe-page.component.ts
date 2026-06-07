@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
+import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { Campeonato, CampeonatoApiService } from './campeonato-api.service';
 
 @Component({
   selector: 'app-campeonato-detalhe-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
   templateUrl: './campeonato-detalhe-page.component.html',
   styleUrl: './campeonato-detalhe-page.component.scss'
 })
