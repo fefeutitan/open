@@ -231,6 +231,8 @@ To continue this session, run `codex resume 019e3130-b9ff-7191-b0e5-670591936ad1
    - visao mais explicita de pendencias;
    - destaque para partidas em andamento;
    - possiveis atalhos contextuais por status.
+   
+5. Repensar num layout elegante e um icone e Favicon usando como exemplo doc\layoutExemplo.jpeg   
 
 ### P2 - Sprint 4
 
