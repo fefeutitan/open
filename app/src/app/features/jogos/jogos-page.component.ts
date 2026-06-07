@@ -3,6 +3,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
+import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { Atleta, CadastroApiService, CategoriaResumo, JuizResumo } from '../atletas/cadastro-api.service';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import { CompeticaoApiService, FaseItem, GrupoItem } from '../fases/competicao-api.service';
@@ -18,7 +20,7 @@ type EditorOperacao = 'RESULTADO' | 'SUMULA' | 'CORRECAO_RESULTADO' | 'CORRECAO_
 @Component({
   selector: 'app-jogos-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
   templateUrl: './jogos-page.component.html',
   styleUrl: './jogos-page.component.scss'
 })

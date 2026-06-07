@@ -1,0 +1,14 @@
+<div
+  class="feedback"
+  [class.error]="tone() === 'error'"
+  [class.warning]="tone() === 'warning'"
+  [class.success]="tone() === 'success'"
+  [class.inline-feedback]="inline()"
+  [class.full-width]="fullWidth()"
+>
+  @if (title()) {
+    <strong>{{ title() }}</strong>
+  }
+  <p>{{ message() }}</p>
+  <ng-content />
+</div>

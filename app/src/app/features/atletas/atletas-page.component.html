@@ -21,13 +21,9 @@
 </header>
 
 @if (loading()) {
-  <section class="state-box">
-    <strong>Carregando atletas...</strong>
-  </section>
+  <app-ui-empty-state title="Carregando atletas..." />
 } @else if (error()) {
-  <section class="feedback error">
-    {{ error() }}
-  </section>
+  <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
   <section class="metrics" aria-label="Resumo de atletas">
     <article>
@@ -54,10 +50,11 @@
       </div>
 
       @if (atletas().length === 0) {
-        <div class="state-box inline-state">
-          <strong>Nenhum atleta cadastrado</strong>
-          <p>Cadastre o primeiro atleta deste campeonato no formulario ao lado.</p>
-        </div>
+        <app-ui-empty-state
+          [inline]="true"
+          title="Nenhum atleta cadastrado"
+          message="Cadastre o primeiro atleta deste campeonato no formulario ao lado."
+        />
       } @else {
         <div class="list">
           @for (atleta of atletas(); track trackByAtleta($index, atleta)) {
@@ -99,9 +96,11 @@
       </div>
 
       @if (formularioBloqueado()) {
-        <div class="feedback warning">
-          <strong>Cadastro de atleta bloqueado</strong>
-          <p>Preencha primeiro as dependencias deste campeonato para liberar o formulario.</p>
+        <app-ui-feedback
+          tone="warning"
+          title="Cadastro de atleta bloqueado"
+          message="Preencha primeiro as dependencias deste campeonato para liberar o formulario."
+        >
           <div class="dependency-links">
             @if (faltamCategorias()) {
               <a [routerLink]="['/campeonatos', campeonatoId(), 'categorias']">Cadastrar categorias</a>
@@ -110,7 +109,7 @@
               <a [routerLink]="['/campeonatos', campeonatoId(), 'nucleos']">Cadastrar nucleos</a>
             }
           </div>
-        </div>
+        </app-ui-feedback>
       }
 
       <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">

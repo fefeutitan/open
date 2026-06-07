@@ -21,13 +21,9 @@
 </header>
 
 @if (loading()) {
-  <section class="state-box">
-    <strong>Carregando fases...</strong>
-  </section>
+  <app-ui-empty-state title="Carregando fases..." />
 } @else if (error()) {
-  <section class="feedback error">
-    {{ error() }}
-  </section>
+  <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
   <section class="metrics" aria-label="Resumo de fases e grupos">
     <article>
@@ -62,10 +58,11 @@
       </div>
 
       @if (fases().length === 0) {
-        <div class="state-box inline-state">
-          <strong>Nenhuma fase cadastrada</strong>
-          <p>Comece criando a fase de grupos ou a primeira fase eliminatoria.</p>
-        </div>
+        <app-ui-empty-state
+          [inline]="true"
+          title="Nenhuma fase cadastrada"
+          message="Comece criando a fase de grupos ou a primeira fase eliminatoria."
+        />
       } @else {
         <div class="list">
           @for (fase of fases(); track trackByFase($index, fase)) {
@@ -108,9 +105,7 @@
                   </div>
 
                   @if (classificacaoError()) {
-                    <div class="feedback warning inline-feedback">
-                      {{ classificacaoError() }}
-                    </div>
+                    <app-ui-feedback tone="warning" [inline]="true" [message]="classificacaoError()!" />
                   }
 
                   @if (gruposDaFase(fase.id).length === 0) {
@@ -223,9 +218,12 @@
       </div>
 
       @if (mataMataBloqueado()) {
-        <div class="feedback warning inline-feedback">
-          <strong>Geracao de mata-mata bloqueada</strong>
-          <p>{{ descricaoBloqueioMataMata() }}</p>
+        <app-ui-feedback
+          tone="warning"
+          [inline]="true"
+          title="Geracao de mata-mata bloqueada"
+          [message]="descricaoBloqueioMataMata()"
+        >
           <div class="dependency-links">
             @if (fasesDeGrupos().length === 0 || fasesEliminatoriasDisponiveis().length === 0) {
               <a href="#nova-fase">Criar fases necessarias</a>
@@ -234,7 +232,7 @@
               <a href="#novo-grupo">Cadastrar grupos</a>
             }
           </div>
-        </div>
+        </app-ui-feedback>
       }
 
       @if (podeGerarMataMata()) {
@@ -271,15 +269,11 @@
           }
 
           @if (mataMataError()) {
-            <div class="feedback warning inline-feedback full-width">
-              {{ mataMataError() }}
-            </div>
+            <app-ui-feedback tone="warning" [inline]="true" [fullWidth]="true" [message]="mataMataError()!" />
           }
 
           @if (mataMataSuccess()) {
-            <div class="feedback success inline-feedback full-width">
-              {{ mataMataSuccess() }}
-            </div>
+            <app-ui-feedback tone="success" [inline]="true" [fullWidth]="true" [message]="mataMataSuccess()!" />
           }
 
           <button type="submit" [disabled]="generatingMataMata() || mataMataBloqueado()">
@@ -318,13 +312,16 @@
       </div>
 
       @if (cadastroGrupoBloqueado()) {
-        <div class="feedback warning inline-feedback">
-          <strong>Cadastro de grupo bloqueado</strong>
-          <p>{{ descricaoBloqueioGrupo() }}</p>
+        <app-ui-feedback
+          tone="warning"
+          [inline]="true"
+          title="Cadastro de grupo bloqueado"
+          [message]="descricaoBloqueioGrupo()"
+        >
           <div class="dependency-links">
             <a href="#nova-fase">Criar fase de grupos</a>
           </div>
-        </div>
+        </app-ui-feedback>
       }
 
       @if (fasesDeGrupos().length > 0) {

@@ -1,0 +1,44 @@
+.feedback {
+  background: #fff;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.feedback strong,
+.feedback p {
+  margin: 0;
+}
+
+.feedback p + * ,
+.feedback strong + p,
+.feedback strong + div,
+.feedback p + div {
+  margin-top: 12px;
+}
+
+.inline-feedback {
+  margin-top: 18px;
+}
+
+.feedback.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.feedback.warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+
+.feedback.success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}

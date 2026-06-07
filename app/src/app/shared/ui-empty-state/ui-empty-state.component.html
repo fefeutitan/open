@@ -1,0 +1,7 @@
+<div class="state-box" [class.inline-state]="inline()">
+  <strong>{{ title() }}</strong>
+  @if (message()) {
+    <p>{{ message() }}</p>
+  }
+  <ng-content />
+</div>

@@ -21,13 +21,9 @@
 </header>
 
 @if (loading()) {
-  <section class="state-box">
-    <strong>Carregando jogos...</strong>
-  </section>
+  <app-ui-empty-state title="Carregando jogos..." />
 } @else if (error()) {
-  <section class="feedback error">
-    {{ error() }}
-  </section>
+  <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
   <section class="metrics" aria-label="Resumo de jogos">
     <article>
@@ -109,22 +105,19 @@
       </form>
 
       @if (actionError()) {
-        <div class="feedback error inline-feedback">
-          {{ actionError() }}
-        </div>
+        <app-ui-feedback tone="error" [inline]="true" [message]="actionError()!" />
       }
 
       @if (actionSuccess()) {
-        <div class="feedback success inline-feedback">
-          {{ actionSuccess() }}
-        </div>
+        <app-ui-feedback tone="success" [inline]="true" [message]="actionSuccess()!" />
       }
 
       @if (jogosFiltrados().length === 0) {
-        <div class="state-box inline-state">
-          <strong>Nenhum jogo encontrado</strong>
-          <p>O filtro atual nao encontrou jogos para este campeonato.</p>
-        </div>
+        <app-ui-empty-state
+          [inline]="true"
+          title="Nenhum jogo encontrado"
+          message="O filtro atual nao encontrou jogos para este campeonato."
+        />
       } @else {
         <div class="list">
           @for (jogo of jogosFiltrados(); track trackByJogo($index, jogo)) {
@@ -213,9 +206,12 @@
       </div>
 
       @if (cadastroBloqueado()) {
-        <div class="feedback warning inline-feedback">
-          <strong>Cadastro de jogo bloqueado</strong>
-          <p>{{ tituloCadastroDependencias() }}</p>
+        <app-ui-feedback
+          tone="warning"
+          [inline]="true"
+          title="Cadastro de jogo bloqueado"
+          [message]="tituloCadastroDependencias()"
+        >
           <div class="dependency-links">
             @if (faltamFases()) {
               <a [routerLink]="['/campeonatos', campeonatoId(), 'fases']">Configurar fases</a>
@@ -227,11 +223,9 @@
               <a [routerLink]="['/campeonatos', campeonatoId(), 'atletas']">Cadastrar atletas</a>
             }
           </div>
-        </div>
+        </app-ui-feedback>
       } @else if (!podeCadastrarJogos()) {
-        <div class="feedback warning inline-feedback">
-          {{ tituloCadastroDependencias() }}
-        </div>
+        <app-ui-feedback tone="warning" [inline]="true" [message]="tituloCadastroDependencias()" />
       }
 
       <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" class="form-grid">
@@ -393,13 +387,16 @@
             </form>
           } @else {
             @if (!podeRegistrarSumula()) {
-              <div class="feedback warning inline-feedback">
-                <strong>Sumula bloqueada</strong>
-                <p>{{ tituloBloqueioSumula() }}</p>
+              <app-ui-feedback
+                tone="warning"
+                [inline]="true"
+                title="Sumula bloqueada"
+                [message]="tituloBloqueioSumula()"
+              >
                 <div class="dependency-links">
                   <a [routerLink]="['/campeonatos', campeonatoId(), 'juizes']">Cadastrar juizes</a>
                 </div>
-              </div>
+              </app-ui-feedback>
             } @else {
               <form [formGroup]="sumulaForm" (ngSubmit)="modoCorrecao() ? corrigirSumula() : salvarSumula()" class="form-grid">
                 <label class="full-width">
