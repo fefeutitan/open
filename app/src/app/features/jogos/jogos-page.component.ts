@@ -156,6 +156,7 @@ export class JogosPageComponent implements OnInit {
   readonly podeCadastrarJogos = computed(() =>
     this.fases().length > 0 && this.categorias().length > 0 && this.atletas().length >= 2
   );
+  readonly atletasAtivos = computed(() => this.atletas().filter((atleta) => atleta.status === 'ATIVO'));
   readonly faseFiltroSelecionada = computed(() =>
     this.fases().find((fase) => fase.id === this.filtroForm.getRawValue().faseId) ?? null
   );
@@ -167,6 +168,13 @@ export class JogosPageComponent implements OnInit {
 
     return this.gruposPorFase()[fase.id] ?? [];
   });
+  readonly faltamFases = computed(() => this.fases().length === 0);
+  readonly faltamCategorias = computed(() => this.categorias().length === 0);
+  readonly faltamAtletas = computed(() => this.atletasAtivos().length < 2);
+  readonly faltamJuizes = computed(() => this.juizes().length < 3);
+  readonly cadastroBloqueado = computed(() =>
+    this.faltamFases() || this.faltamCategorias() || this.faltamAtletas()
+  );
 
   ngOnInit(): void {
     const campeonatoId = Number(this.route.snapshot.paramMap.get('id'));
@@ -684,12 +692,16 @@ export class JogosPageComponent implements OnInit {
   }
 
   tituloCadastroDependencias(): string {
-    if (this.fases().length === 0) {
+    if (this.faltamFases()) {
       return 'Cadastre ao menos uma fase antes de criar jogos.';
     }
 
-    if (this.categorias().length === 0) {
+    if (this.faltamCategorias()) {
       return 'Cadastre ao menos uma categoria antes de criar jogos.';
+    }
+
+    if (this.faltamAtletas()) {
+      return 'Cadastre ao menos dois atletas ativos antes de criar jogos.';
     }
 
     if (this.atletasDisponiveis().length < 2) {
@@ -697,6 +709,10 @@ export class JogosPageComponent implements OnInit {
     }
 
     return '';
+  }
+
+  tituloBloqueioSumula(): string {
+    return 'Cadastre ao menos 3 juizes neste campeonato antes de registrar ou corrigir a sumula.';
   }
 
   private carregarGruposDasFases(fases: FaseItem[]): void {

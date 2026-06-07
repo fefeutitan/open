@@ -231,6 +231,17 @@
   gap: 8px;
 }
 
+.form-fieldset {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.form-fieldset[disabled] {
+  opacity: 0.75;
+}
+
 .full-width {
   grid-column: 1 / -1;
 }
@@ -262,6 +273,23 @@ select:focus {
 .inline-state,
 .inline-feedback {
   margin-top: 18px;
+}
+
+.dependency-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dependency-links a {
+  background: #fff;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  font-weight: 700;
+  padding: 10px 14px;
+  text-decoration: none;
 }
 
 .inline-state {

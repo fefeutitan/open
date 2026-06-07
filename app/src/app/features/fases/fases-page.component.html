@@ -173,7 +173,7 @@
     </article>
 
     <article class="panel stack-panel">
-      <div class="panel-header">
+      <div class="panel-header" id="nova-fase">
         <div>
           <h2>Nova fase</h2>
           <span>POST /api/competicao/fases</span>
@@ -222,11 +222,22 @@
         </div>
       </div>
 
-      @if (!podeGerarMataMata()) {
+      @if (mataMataBloqueado()) {
         <div class="feedback warning inline-feedback">
-          {{ descricaoBloqueioMataMata() }}
+          <strong>Geracao de mata-mata bloqueada</strong>
+          <p>{{ descricaoBloqueioMataMata() }}</p>
+          <div class="dependency-links">
+            @if (fasesDeGrupos().length === 0 || fasesEliminatoriasDisponiveis().length === 0) {
+              <a href="#nova-fase">Criar fases necessarias</a>
+            }
+            @if (gruposCadastrados() === 0 && fasesDeGrupos().length > 0) {
+              <a href="#novo-grupo">Cadastrar grupos</a>
+            }
+          </div>
         </div>
-      } @else {
+      }
+
+      @if (podeGerarMataMata()) {
         <form [formGroup]="mataMataForm" (ngSubmit)="gerarMataMata()" class="form-grid">
           <label class="full-width">
             <span>Fase de grupos</span>
@@ -271,7 +282,7 @@
             </div>
           }
 
-          <button type="submit" [disabled]="generatingMataMata() || !!descricaoBloqueioMataMata()">
+          <button type="submit" [disabled]="generatingMataMata() || mataMataBloqueado()">
             {{ generatingMataMata() ? 'Gerando...' : 'Gerar mata-mata' }}
           </button>
         </form>
@@ -299,45 +310,53 @@
 
       <div class="separator"></div>
 
-      <div class="panel-header">
+      <div class="panel-header" id="novo-grupo">
         <div>
           <h2>Novo grupo</h2>
           <span>POST /api/competicao/grupos</span>
         </div>
       </div>
 
-      @if (fasesDeGrupos().length === 0) {
+      @if (cadastroGrupoBloqueado()) {
         <div class="feedback warning inline-feedback">
-          Crie primeiro uma fase do tipo GRUPOS para habilitar o cadastro de grupos.
+          <strong>Cadastro de grupo bloqueado</strong>
+          <p>{{ descricaoBloqueioGrupo() }}</p>
+          <div class="dependency-links">
+            <a href="#nova-fase">Criar fase de grupos</a>
+          </div>
         </div>
-      } @else {
+      }
+
+      @if (fasesDeGrupos().length > 0) {
         <form [formGroup]="grupoForm" (ngSubmit)="salvarGrupo()" class="form-grid">
-          <label class="full-width">
-            <span>Fase</span>
-            <select formControlName="faseId">
-              <option [ngValue]="0">Selecione</option>
-              @for (fase of fasesDeGrupos(); track trackByFase($index, fase)) {
-                <option [ngValue]="fase.id">{{ fase.nome }}</option>
-              }
-            </select>
-          </label>
+          <fieldset class="form-grid form-fieldset" [disabled]="cadastroGrupoBloqueado()">
+            <label class="full-width">
+              <span>Fase</span>
+              <select formControlName="faseId">
+                <option [ngValue]="0">Selecione</option>
+                @for (fase of fasesDeGrupos(); track trackByFase($index, fase)) {
+                  <option [ngValue]="fase.id">{{ fase.nome }}</option>
+                }
+              </select>
+            </label>
 
-          <label class="full-width">
-            <span>Nome do grupo</span>
-            <input type="text" formControlName="nome" />
-          </label>
+            <label class="full-width">
+              <span>Nome do grupo</span>
+              <input type="text" formControlName="nome" />
+            </label>
 
-          @if (grupoForm.controls.faseId.invalid && grupoForm.controls.faseId.touched) {
-            <p class="field-error full-width">Selecione a fase de grupos.</p>
-          }
+            @if (grupoForm.controls.faseId.invalid && grupoForm.controls.faseId.touched) {
+              <p class="field-error full-width">Selecione a fase de grupos.</p>
+            }
 
-          @if (grupoForm.controls.nome.invalid && grupoForm.controls.nome.touched) {
-            <p class="field-error full-width">Informe o nome do grupo.</p>
-          }
+            @if (grupoForm.controls.nome.invalid && grupoForm.controls.nome.touched) {
+              <p class="field-error full-width">Informe o nome do grupo.</p>
+            }
 
-          <button type="submit" [disabled]="savingGrupo()">
-            {{ savingGrupo() ? 'Salvando...' : 'Salvar grupo' }}
-          </button>
+            <button type="submit" [disabled]="savingGrupo() || cadastroGrupoBloqueado()">
+              {{ savingGrupo() ? 'Salvando...' : 'Salvar grupo' }}
+            </button>
+          </fieldset>
         </form>
       }
     </article>

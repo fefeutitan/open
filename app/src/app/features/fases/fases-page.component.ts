@@ -54,12 +54,24 @@ export class FasesPageComponent implements OnInit {
   readonly fasesEliminatoriasDisponiveis = computed(() =>
     this.fases().filter((fase) => fase.tipo === 'ELIMINATORIA')
   );
+  readonly gruposCadastrados = computed(() =>
+    Object.values(this.gruposPorFase()).reduce((total, grupos) => total + grupos.length, 0)
+  );
   readonly faseGruposSelecionada = computed(() =>
     this.fasesDeGrupos().find((fase) => fase.id === this.mataMataForm.getRawValue().faseGruposId) ?? null
   );
   readonly podeGerarMataMata = computed(() =>
     this.fasesDeGrupos().length > 0 && this.fasesEliminatoriasDisponiveis().length > 0
   );
+  readonly cadastroGrupoBloqueado = computed(() => this.fasesDeGrupos().length === 0);
+  readonly mataMataBloqueado = computed(() => {
+    if (this.fasesDeGrupos().length === 0 || this.fasesEliminatoriasDisponiveis().length === 0) {
+      return true;
+    }
+
+    const fase = this.faseGruposSelecionada();
+    return !fase || fase.classificadosPorGrupo == null || fase.classificadosPorGrupo < 1 || this.gruposCadastrados() === 0;
+  });
 
   readonly faseForm = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(120)]],
@@ -273,12 +285,20 @@ export class FasesPageComponent implements OnInit {
       return 'Crie uma fase do tipo ELIMINATORIA para receber os confrontos gerados.';
     }
 
+    if (this.gruposCadastrados() === 0) {
+      return 'Cadastre ao menos um grupo na fase de grupos antes de gerar o mata-mata.';
+    }
+
     const fase = this.faseGruposSelecionada();
     if (fase?.classificadosPorGrupo == null || fase.classificadosPorGrupo < 1) {
       return 'A fase de grupos escolhida precisa informar quantos atletas classificam por grupo.';
     }
 
     return '';
+  }
+
+  descricaoBloqueioGrupo(): string {
+    return 'Crie primeiro uma fase do tipo GRUPOS para habilitar o cadastro de grupos.';
   }
 
   confrontoGerado(jogo: JogoGeradoItem): string {

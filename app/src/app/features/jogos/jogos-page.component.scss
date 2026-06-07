@@ -150,7 +150,8 @@
 .list-item,
 .summary-list article,
 .sidebar-note,
-.judge-card {
+.judge-card,
+.dependency-links a {
   border: 1px solid #d9e0ea;
   border-radius: 8px;
   display: grid;
@@ -223,6 +224,17 @@
   gap: 8px;
 }
 
+.form-fieldset {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.form-fieldset[disabled] {
+  opacity: 0.75;
+}
+
 .full-width {
   grid-column: 1 / -1;
 }
@@ -235,6 +247,21 @@
 .inline-state,
 .inline-feedback {
   margin-top: 18px;
+}
+
+.dependency-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dependency-links a {
+  background: #fff;
+  color: #9a3412;
+  font-weight: 700;
+  padding: 10px 14px;
+  text-decoration: none;
 }
 
 .inline-state {

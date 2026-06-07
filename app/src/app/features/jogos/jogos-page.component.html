@@ -137,7 +137,11 @@
                     <p>{{ grupo }}</p>
                   }
                 </div>
-                <span class="status-badge" [class.status-running]="jogo.status === 'EM_ANDAMENTO'" [class.status-finished]="jogo.status === 'FINALIZADO'">
+                <span
+                  class="status-badge"
+                  [class.status-running]="jogo.status === 'EM_ANDAMENTO'"
+                  [class.status-finished]="jogo.status === 'FINALIZADO'"
+                >
                   {{ jogo.status }}
                 </span>
               </div>
@@ -208,91 +212,109 @@
         </div>
       </div>
 
-      @if (!podeCadastrarJogos()) {
+      @if (cadastroBloqueado()) {
+        <div class="feedback warning inline-feedback">
+          <strong>Cadastro de jogo bloqueado</strong>
+          <p>{{ tituloCadastroDependencias() }}</p>
+          <div class="dependency-links">
+            @if (faltamFases()) {
+              <a [routerLink]="['/campeonatos', campeonatoId(), 'fases']">Configurar fases</a>
+            }
+            @if (faltamCategorias()) {
+              <a [routerLink]="['/campeonatos', campeonatoId(), 'categorias']">Cadastrar categorias</a>
+            }
+            @if (faltamAtletas()) {
+              <a [routerLink]="['/campeonatos', campeonatoId(), 'atletas']">Cadastrar atletas</a>
+            }
+          </div>
+        </div>
+      } @else if (!podeCadastrarJogos()) {
         <div class="feedback warning inline-feedback">
           {{ tituloCadastroDependencias() }}
         </div>
       }
 
       <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" class="form-grid">
-        <label class="full-width">
-          <span>Fase</span>
-          <select formControlName="faseId" (change)="atualizarDependenciasCadastro()">
-            <option [ngValue]="0">Selecione</option>
-            @for (fase of fases(); track trackByFase($index, fase)) {
-              <option [ngValue]="fase.id">{{ fase.nome }} · {{ fase.tipo }}</option>
-            }
-          </select>
-        </label>
-
-        @if (faseSelecionada()?.tipo === 'GRUPOS') {
+        <fieldset class="form-grid form-fieldset" [disabled]="cadastroBloqueado()">
           <label class="full-width">
-            <span>Grupo</span>
-            <select formControlName="grupoId">
+            <span>Fase</span>
+            <select formControlName="faseId" (change)="atualizarDependenciasCadastro()">
               <option [ngValue]="0">Selecione</option>
-              @for (grupo of gruposDisponiveis(); track trackByGrupo($index, grupo)) {
-                <option [ngValue]="grupo.id">{{ grupo.nome }}</option>
+              @for (fase of fases(); track trackByFase($index, fase)) {
+                <option [ngValue]="fase.id">{{ fase.nome }} - {{ fase.tipo }}</option>
               }
             </select>
           </label>
-        }
 
-        <label class="full-width">
-          <span>Categoria</span>
-          <select formControlName="categoriaId" (change)="atualizarDependenciasCadastro()">
-            <option [ngValue]="0">Selecione</option>
-            @for (categoria of categorias(); track trackByCategoria($index, categoria)) {
-              <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
-            }
-          </select>
-        </label>
+          @if (faseSelecionada()?.tipo === 'GRUPOS') {
+            <label class="full-width">
+              <span>Grupo</span>
+              <select formControlName="grupoId">
+                <option [ngValue]="0">Selecione</option>
+                @for (grupo of gruposDisponiveis(); track trackByGrupo($index, grupo)) {
+                  <option [ngValue]="grupo.id">{{ grupo.nome }}</option>
+                }
+              </select>
+            </label>
+          }
 
-        <label>
-          <span>Atleta vermelho</span>
-          <select formControlName="atletaVermelhoId" (change)="atualizarDependenciasCadastro()">
-            <option [ngValue]="0">Selecione</option>
-            @for (atleta of atletasDisponiveis(); track trackByAtleta($index, atleta)) {
-              <option [ngValue]="atleta.id">{{ atleta.nome }}</option>
-            }
-          </select>
-        </label>
+          <label class="full-width">
+            <span>Categoria</span>
+            <select formControlName="categoriaId" (change)="atualizarDependenciasCadastro()">
+              <option [ngValue]="0">Selecione</option>
+              @for (categoria of categorias(); track trackByCategoria($index, categoria)) {
+                <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+              }
+            </select>
+          </label>
 
-        <label>
-          <span>Atleta azul</span>
-          <select formControlName="atletaAzulId">
-            <option [ngValue]="0">Selecione</option>
-            @for (atleta of atletasDisponiveis(); track trackByAtleta($index, atleta)) {
-              @if (atleta.id !== cadastroForm.getRawValue().atletaVermelhoId) {
+          <label>
+            <span>Atleta vermelho</span>
+            <select formControlName="atletaVermelhoId" (change)="atualizarDependenciasCadastro()">
+              <option [ngValue]="0">Selecione</option>
+              @for (atleta of atletasDisponiveis(); track trackByAtleta($index, atleta)) {
                 <option [ngValue]="atleta.id">{{ atleta.nome }}</option>
               }
-            }
-          </select>
-        </label>
+            </select>
+          </label>
 
-        <label class="full-width">
-          <span>Data e hora</span>
-          <input type="datetime-local" formControlName="dataHora" />
-        </label>
+          <label>
+            <span>Atleta azul</span>
+            <select formControlName="atletaAzulId">
+              <option [ngValue]="0">Selecione</option>
+              @for (atleta of atletasDisponiveis(); track trackByAtleta($index, atleta)) {
+                @if (atleta.id !== cadastroForm.getRawValue().atletaVermelhoId) {
+                  <option [ngValue]="atleta.id">{{ atleta.nome }}</option>
+                }
+              }
+            </select>
+          </label>
 
-        @if (cadastroForm.controls.faseId.invalid && cadastroForm.controls.faseId.touched) {
-          <p class="field-error full-width">Selecione a fase.</p>
-        }
+          <label class="full-width">
+            <span>Data e hora</span>
+            <input type="datetime-local" formControlName="dataHora" />
+          </label>
 
-        @if (cadastroForm.controls.categoriaId.invalid && cadastroForm.controls.categoriaId.touched) {
-          <p class="field-error full-width">Selecione a categoria.</p>
-        }
+          @if (cadastroForm.controls.faseId.invalid && cadastroForm.controls.faseId.touched) {
+            <p class="field-error full-width">Selecione a fase.</p>
+          }
 
-        @if (cadastroForm.controls.atletaVermelhoId.invalid && cadastroForm.controls.atletaVermelhoId.touched) {
-          <p class="field-error full-width">Selecione o atleta vermelho.</p>
-        }
+          @if (cadastroForm.controls.categoriaId.invalid && cadastroForm.controls.categoriaId.touched) {
+            <p class="field-error full-width">Selecione a categoria.</p>
+          }
 
-        @if (cadastroForm.controls.atletaAzulId.invalid && cadastroForm.controls.atletaAzulId.touched) {
-          <p class="field-error full-width">Selecione o atleta azul.</p>
-        }
+          @if (cadastroForm.controls.atletaVermelhoId.invalid && cadastroForm.controls.atletaVermelhoId.touched) {
+            <p class="field-error full-width">Selecione o atleta vermelho.</p>
+          }
 
-        <button type="submit" [disabled]="savingCadastro() || !podeCadastrarJogos()">
-          {{ savingCadastro() ? 'Salvando...' : 'Criar jogo' }}
-        </button>
+          @if (cadastroForm.controls.atletaAzulId.invalid && cadastroForm.controls.atletaAzulId.touched) {
+            <p class="field-error full-width">Selecione o atleta azul.</p>
+          }
+
+          <button type="submit" [disabled]="savingCadastro() || cadastroBloqueado()">
+            {{ savingCadastro() ? 'Salvando...' : 'Criar jogo' }}
+          </button>
+        </fieldset>
       </form>
 
       <div class="separator"></div>
@@ -372,7 +394,11 @@
           } @else {
             @if (!podeRegistrarSumula()) {
               <div class="feedback warning inline-feedback">
-                Cadastre ao menos 3 juizes neste campeonato antes de registrar ou corrigir a sumula.
+                <strong>Sumula bloqueada</strong>
+                <p>{{ tituloBloqueioSumula() }}</p>
+                <div class="dependency-links">
+                  <a [routerLink]="['/campeonatos', campeonatoId(), 'juizes']">Cadastrar juizes</a>
+                </div>
               </div>
             } @else {
               <form [formGroup]="sumulaForm" (ngSubmit)="modoCorrecao() ? corrigirSumula() : salvarSumula()" class="form-grid">
