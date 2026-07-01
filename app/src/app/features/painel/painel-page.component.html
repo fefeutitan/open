@@ -1,21 +1,22 @@
-<header class="topbar">
-  <div>
-    <p class="eyebrow">Operacao do campeonato</p>
-    <h1>Painel do Open Volta ao Mundo</h1>
-    @if (campeonatoSelecionado(); as campeonato) {
-      <p class="page-copy">Acompanhamento operacional de {{ campeonato.nome }}.</p>
-    } @else {
-      <p class="page-copy">Selecione um campeonato para carregar a fila operacional.</p>
-    }
-  </div>
+<app-ui-page-header
+  eyebrow="Operacao do campeonato"
+  title="Painel do Open Volta ao Mundo"
+  [copy]="campeonatoSelecionado() ? 'Acompanhamento operacional de ' + campeonatoSelecionado()!.nome + '.' : 'Selecione um campeonato para carregar a fila operacional.'"
+>
+  @if (campeonatoSelecionado(); as campeonato) {
+    <div page-context>
+      <strong>{{ campeonato.nome }}</strong>
+      <span>{{ championshipContext() }}</span>
+    </div>
+  }
 
-  <div class="topbar-actions">
+  <div page-actions>
     <button type="button" (click)="carregarPainel()" [disabled]="loadingCampeonatos() || loadingJogos()">
       Atualizar painel
     </button>
     <a class="primary-link" [routerLink]="rotaJogos()">Novo jogo</a>
   </div>
-</header>
+</app-ui-page-header>
 
 @if (error()) {
   <app-ui-feedback tone="error" [message]="error()!" />
@@ -39,29 +40,12 @@
   @if (campeonatoSelecionado(); as campeonato) {
     <div class="championship-context">
       <strong>{{ campeonato.nome }}</strong>
-      <span>{{ campeonato.status }} • {{ campeonato.local }}</span>
+      <span>{{ campeonato.status }} - {{ campeonato.local }}</span>
     </div>
   }
 </section>
 
-<section class="metrics" aria-label="Resumo operacional">
-  <article>
-    <span>Jogos hoje</span>
-    <strong>{{ jogosHoje() }}</strong>
-  </article>
-  <article>
-    <span>Em andamento</span>
-    <strong>{{ jogosEmAndamento() }}</strong>
-  </article>
-  <article>
-    <span>Desempates pendentes</span>
-    <strong>{{ desempatesPendentes() }}</strong>
-  </article>
-  <article>
-    <span>Finalizados</span>
-    <strong>{{ jogosFinalizados() }}</strong>
-  </article>
-</section>
+<app-ui-stat-grid ariaLabel="Resumo operacional" emphasis="large" [items]="metricas()" />
 
 <section class="content-grid">
   <article class="panel">

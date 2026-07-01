@@ -1,4 +1,3 @@
-.topbar,
 .panel-header,
 .queue-header,
 .filters-panel {
@@ -9,18 +8,12 @@
 }
 
 .page-copy,
-.metrics span,
 .panel-header span,
 .meta-grid dt,
 .queue-header p,
 .championship-context span,
 .side-note p {
   color: #64748b;
-}
-
-.topbar-actions {
-  display: flex;
-  gap: 10px;
 }
 
 .primary-link,
@@ -85,23 +78,6 @@ button,
   justify-items: end;
 }
 
-.metrics {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 24px;
-}
-
-.metrics article {
-  display: grid;
-  gap: 8px;
-  padding: 18px;
-}
-
-.metrics strong {
-  font-size: 2rem;
-}
-
 .content-grid {
   display: grid;
   gap: 18px;
@@ -123,8 +99,7 @@ button,
   margin-bottom: 18px;
 }
 
-.empty-state,
-.side-note {
+.empty-state {
   border: 1px dashed #cbd5e1;
   border-radius: 8px;
   display: grid;
@@ -209,7 +184,6 @@ button[disabled] {
 }
 
 @media (max-width: 900px) {
-  .topbar,
   .panel-header,
   .queue-header,
   .filters-panel {
@@ -217,21 +191,11 @@ button[disabled] {
     flex-direction: column;
   }
 
-  .topbar-actions,
-  .metrics,
   .meta-grid {
     grid-template-columns: 1fr;
   }
 
-  .topbar-actions {
-    display: grid;
-  }
-
   .championship-context {
     justify-items: start;
-  }
-
-  .metrics {
-    grid-template-columns: 1fr;
   }
 }

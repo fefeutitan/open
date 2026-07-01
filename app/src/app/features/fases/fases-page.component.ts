@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
+import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
+import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import {
   ClassificacaoAtletaItem,
@@ -17,7 +19,14 @@ import {
 @Component({
   selector: 'app-fases-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    UiFeedbackComponent,
+    UiEmptyStateComponent,
+    UiPageHeaderComponent,
+    UiStatGridComponent
+  ],
   templateUrl: './fases-page.component.html',
   styleUrl: './fases-page.component.scss'
 })
@@ -52,6 +61,13 @@ export class FasesPageComponent implements OnInit {
   readonly totalAtletasClassificados = computed(() =>
     Object.values(this.classificacaoPorGrupo()).reduce((total, itens) => total + itens.length, 0)
   );
+  readonly metricas = computed<UiStatItem[]>(() => [
+    { label: 'Total de fases', value: this.totalFases() },
+    { label: 'Fases de grupos', value: this.fasesGrupos() },
+    { label: 'Eliminatorias', value: this.fasesEliminatorias() },
+    { label: 'Total de grupos', value: this.totalGrupos() },
+    { label: 'Atletas na classificacao', value: this.totalAtletasClassificados() }
+  ]);
   readonly fasesDeGrupos = computed(() => this.fases().filter((fase) => fase.tipo === 'GRUPOS'));
   readonly fasesEliminatoriasDisponiveis = computed(() =>
     this.fases().filter((fase) => fase.tipo === 'ELIMINATORIA')

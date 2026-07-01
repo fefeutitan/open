@@ -3,13 +3,22 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
+import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
+import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import { JogoItem, JogosApiService } from '../jogos/jogos-api.service';
 
 @Component({
   selector: 'app-painel-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    UiFeedbackComponent,
+    UiEmptyStateComponent,
+    UiPageHeaderComponent,
+    UiStatGridComponent
+  ],
   templateUrl: './painel-page.component.html',
   styleUrl: './painel-page.component.scss'
 })
@@ -36,11 +45,21 @@ export class PainelPageComponent implements OnInit {
   readonly jogosFinalizados = computed(() =>
     this.jogos().filter((jogo) => jogo.status === 'FINALIZADO').length
   );
+  readonly metricas = computed<UiStatItem[]>(() => [
+    { label: 'Jogos hoje', value: this.jogosHoje() },
+    { label: 'Em andamento', value: this.jogosEmAndamento() },
+    { label: 'Desempates pendentes', value: this.desempatesPendentes() },
+    { label: 'Finalizados', value: this.jogosFinalizados() }
+  ]);
   readonly filaOperacional = computed(() =>
     [...this.jogos()]
       .filter((jogo) => jogo.status !== 'FINALIZADO')
       .sort((a, b) => this.ordemStatus(a.status) - this.ordemStatus(b.status) || this.ordemData(a, b))
   );
+  readonly championshipContext = computed(() => {
+    const campeonato = this.campeonatoSelecionado();
+    return campeonato ? `${campeonato.status} - ${campeonato.local}` : null;
+  });
 
   ngOnInit(): void {
     this.carregarPainel();

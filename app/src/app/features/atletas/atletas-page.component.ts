@@ -5,13 +5,23 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
+import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
+import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import { Atleta, CadastroApiService, CategoriaResumo, NucleoResumo } from './cadastro-api.service';
 
 @Component({
   selector: 'app-atletas-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    UiFeedbackComponent,
+    UiEmptyStateComponent,
+    UiPageHeaderComponent,
+    UiStatGridComponent
+  ],
   templateUrl: './atletas-page.component.html',
   styleUrl: './atletas-page.component.scss'
 })
@@ -35,6 +45,11 @@ export class AtletasPageComponent implements OnInit {
   readonly faltamCategorias = computed(() => this.categorias().length === 0);
   readonly faltamNucleos = computed(() => this.nucleos().length === 0);
   readonly formularioBloqueado = computed(() => this.faltamCategorias() || this.faltamNucleos());
+  readonly metricas = computed<UiStatItem[]>(() => [
+    { label: 'Total cadastrados', value: this.totalAtletas() },
+    { label: 'Ativos', value: this.atletasAtivos() },
+    { label: 'Dependencias', value: `${this.categorias().length} categorias / ${this.nucleos().length} nucleos` }
+  ]);
 
   readonly form = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(120)]],

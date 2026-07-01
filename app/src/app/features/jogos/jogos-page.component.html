@@ -1,48 +1,24 @@
-<header class="page-header">
-  <div>
-    @if (campeonatoId(); as id) {
-      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
-    }
-    <p class="eyebrow">Operacao da competicao</p>
-    <h1>Jogos</h1>
-    @if (campeonato(); as item) {
-      <p class="page-copy">Fila operacional de jogos vinculados a {{ item.nome }}.</p>
-    } @else {
-      <p class="page-copy">Lista e acompanhamento dos jogos por campeonato.</p>
-    }
-  </div>
-
+<app-ui-page-header
+  [backLink]="campeonatoId() ? ['/campeonatos', campeonatoId()!] : null"
+  backLabel="Voltar para o campeonato"
+  eyebrow="Operacao da competicao"
+  title="Jogos"
+  [copy]="campeonato() ? 'Fila operacional de jogos vinculados a ' + campeonato()!.nome + '.' : 'Lista e acompanhamento dos jogos por campeonato.'"
+>
   @if (campeonato(); as item) {
-    <div class="header-context">
+    <div page-context>
       <strong>{{ item.nome }}</strong>
       <span>{{ item.status }}</span>
     </div>
   }
-</header>
+</app-ui-page-header>
 
 @if (loading()) {
   <app-ui-empty-state title="Carregando jogos..." />
 } @else if (error()) {
   <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
-  <section class="metrics" aria-label="Resumo de jogos">
-    <article>
-      <span>Total</span>
-      <strong>{{ totalJogos() }}</strong>
-    </article>
-    <article>
-      <span>Agendados</span>
-      <strong>{{ jogosAgendados() }}</strong>
-    </article>
-    <article>
-      <span>Em andamento</span>
-      <strong>{{ jogosEmAndamento() }}</strong>
-    </article>
-    <article>
-      <span>Finalizados</span>
-      <strong>{{ jogosFinalizados() }}</strong>
-    </article>
-  </section>
+  <app-ui-stat-grid ariaLabel="Resumo de jogos" [items]="metricas()" />
 
   <section class="content-grid">
     <article class="panel">

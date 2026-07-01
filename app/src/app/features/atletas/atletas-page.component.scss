@@ -1,4 +1,3 @@
-.page-header,
 .panel-header,
 .list-item-header {
   display: flex;
@@ -7,33 +6,13 @@
   gap: 12px;
 }
 
-.back-link {
-  color: #b91c1c;
-  display: inline-block;
-  font-weight: 700;
-  margin-bottom: 12px;
-  text-decoration: none;
-}
-
-.back-link:hover {
-  text-decoration: underline;
-}
-
 .page-copy,
-.metrics span,
 .panel-header span,
 .meta-grid dt,
 .list-item-header p {
   color: #64748b;
 }
 
-.header-context {
-  display: grid;
-  gap: 4px;
-  justify-items: end;
-}
-
-.header-context span,
 .status-badge {
   border-radius: 999px;
   background: #dcfce7;
@@ -48,30 +27,12 @@
   color: #334155;
 }
 
-.metrics {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 24px;
-}
-
-.metrics article,
 .panel,
 .state-box,
 .feedback {
   border: 1px solid #d9e0ea;
   border-radius: 8px;
   background: #ffffff;
-}
-
-.metrics article {
-  display: grid;
-  gap: 8px;
-  padding: 18px;
-}
-
-.metrics strong {
-  font-size: 1.5rem;
 }
 
 .content-grid {
@@ -221,18 +182,12 @@ button[disabled] {
 }
 
 @media (max-width: 900px) {
-  .page-header,
   .panel-header,
   .list-item-header {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .header-context {
-    justify-items: start;
-  }
-
-  .metrics,
   .meta-grid,
   .form-grid {
     grid-template-columns: 1fr;

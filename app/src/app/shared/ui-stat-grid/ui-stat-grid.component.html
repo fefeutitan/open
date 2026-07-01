@@ -1,0 +1,8 @@
+<section class="stat-grid" [class.large]="emphasis() === 'large'" [attr.aria-label]="ariaLabel()">
+  @for (item of items(); track item.label) {
+    <article class="stat-card">
+      <span>{{ item.label }}</span>
+      <strong>{{ item.value }}</strong>
+    </article>
+  }
+</section>

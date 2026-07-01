@@ -1,44 +1,24 @@
-<header class="page-header">
-  <div>
-    @if (campeonatoId(); as id) {
-      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
-    }
-    <p class="eyebrow">Cadastro operacional</p>
-    <h1>Atletas</h1>
-    @if (campeonato(); as item) {
-      <p class="page-copy">Gerenciando atletas vinculados a {{ item.nome }}.</p>
-    } @else {
-      <p class="page-copy">Lista e cadastro de atletas por campeonato.</p>
-    }
-  </div>
-
+<app-ui-page-header
+  [backLink]="campeonatoId() ? ['/campeonatos', campeonatoId()!] : null"
+  backLabel="Voltar para o campeonato"
+  eyebrow="Cadastro operacional"
+  title="Atletas"
+  [copy]="campeonato() ? 'Gerenciando atletas vinculados a ' + campeonato()!.nome + '.' : 'Lista e cadastro de atletas por campeonato.'"
+>
   @if (campeonato(); as item) {
-    <div class="header-context">
+    <div page-context>
       <strong>{{ item.nome }}</strong>
       <span>{{ item.status }}</span>
     </div>
   }
-</header>
+</app-ui-page-header>
 
 @if (loading()) {
   <app-ui-empty-state title="Carregando atletas..." />
 } @else if (error()) {
   <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
-  <section class="metrics" aria-label="Resumo de atletas">
-    <article>
-      <span>Total cadastrados</span>
-      <strong>{{ totalAtletas() }}</strong>
-    </article>
-    <article>
-      <span>Ativos</span>
-      <strong>{{ atletasAtivos() }}</strong>
-    </article>
-    <article>
-      <span>Dependencias</span>
-      <strong>{{ categorias().length }} categorias / {{ nucleos().length }} nucleos</strong>
-    </article>
-  </section>
+  <app-ui-stat-grid ariaLabel="Resumo de atletas" [items]="metricas()" />
 
   <section class="content-grid">
     <article class="panel">

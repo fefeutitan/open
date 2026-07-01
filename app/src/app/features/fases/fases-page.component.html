@@ -1,52 +1,24 @@
-<header class="page-header">
-  <div>
-    @if (campeonatoId(); as id) {
-      <a class="back-link" [routerLink]="['/campeonatos', id]">Voltar para o campeonato</a>
-    }
-    <p class="eyebrow">Configuracao da competicao</p>
-    <h1>Fases e grupos</h1>
-    @if (campeonato(); as item) {
-      <p class="page-copy">Estrutura competitiva vinculada a {{ item.nome }}.</p>
-    } @else {
-      <p class="page-copy">Cadastro de fases e organizacao de grupos do campeonato.</p>
-    }
-  </div>
-
+<app-ui-page-header
+  [backLink]="campeonatoId() ? ['/campeonatos', campeonatoId()!] : null"
+  backLabel="Voltar para o campeonato"
+  eyebrow="Configuracao da competicao"
+  title="Fases e grupos"
+  [copy]="campeonato() ? 'Estrutura competitiva vinculada a ' + campeonato()!.nome + '.' : 'Cadastro de fases e organizacao de grupos do campeonato.'"
+>
   @if (campeonato(); as item) {
-    <div class="header-context">
+    <div page-context>
       <strong>{{ item.nome }}</strong>
       <span>{{ item.status }}</span>
     </div>
   }
-</header>
+</app-ui-page-header>
 
 @if (loading()) {
   <app-ui-empty-state title="Carregando fases..." />
 } @else if (error()) {
   <app-ui-feedback tone="error" [message]="error()!" />
 } @else {
-  <section class="metrics" aria-label="Resumo de fases e grupos">
-    <article>
-      <span>Total de fases</span>
-      <strong>{{ totalFases() }}</strong>
-    </article>
-    <article>
-      <span>Fases de grupos</span>
-      <strong>{{ fasesGrupos() }}</strong>
-    </article>
-    <article>
-      <span>Eliminatorias</span>
-      <strong>{{ fasesEliminatorias() }}</strong>
-    </article>
-    <article>
-      <span>Total de grupos</span>
-      <strong>{{ totalGrupos() }}</strong>
-    </article>
-    <article>
-      <span>Atletas na classificacao</span>
-      <strong>{{ totalAtletasClassificados() }}</strong>
-    </article>
-  </section>
+  <app-ui-stat-grid ariaLabel="Resumo de fases e grupos" [items]="metricas()" />
 
   <section class="content-grid">
     <article class="panel">

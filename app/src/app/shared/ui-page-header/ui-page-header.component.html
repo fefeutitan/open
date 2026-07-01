@@ -1,0 +1,26 @@
+<header class="page-header">
+  <div class="content">
+    @if (backLink() && backLabel()) {
+      <a class="back-link" [routerLink]="backLink()!">{{ backLabel() }}</a>
+    }
+
+    @if (eyebrow()) {
+      <p class="eyebrow">{{ eyebrow() }}</p>
+    }
+
+    <h1>{{ title() }}</h1>
+
+    @if (copy()) {
+      <p class="page-copy">{{ copy() }}</p>
+    }
+  </div>
+
+  <div class="aside">
+    <div class="context-slot">
+      <ng-content select="[page-context]"></ng-content>
+    </div>
+    <div class="actions-slot">
+      <ng-content select="[page-actions]"></ng-content>
+    </div>
+  </div>
+</header>

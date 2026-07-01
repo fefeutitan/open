@@ -5,6 +5,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
+import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
+import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Atleta, CadastroApiService, CategoriaResumo, JuizResumo } from '../atletas/cadastro-api.service';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import { CompeticaoApiService, FaseItem, GrupoItem } from '../fases/competicao-api.service';
@@ -20,7 +22,15 @@ type EditorOperacao = 'RESULTADO' | 'SUMULA' | 'CORRECAO_RESULTADO' | 'CORRECAO_
 @Component({
   selector: 'app-jogos-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, UiFeedbackComponent, UiEmptyStateComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    UiFeedbackComponent,
+    UiEmptyStateComponent,
+    UiPageHeaderComponent,
+    UiStatGridComponent
+  ],
   templateUrl: './jogos-page.component.html',
   styleUrl: './jogos-page.component.scss'
 })
@@ -129,6 +139,12 @@ export class JogosPageComponent implements OnInit {
   readonly jogosFinalizados = computed(() =>
     this.jogos().filter((jogo) => jogo.status === 'FINALIZADO').length
   );
+  readonly metricas = computed<UiStatItem[]>(() => [
+    { label: 'Total', value: this.totalJogos() },
+    { label: 'Agendados', value: this.jogosAgendados() },
+    { label: 'Em andamento', value: this.jogosEmAndamento() },
+    { label: 'Finalizados', value: this.jogosFinalizados() }
+  ]);
   readonly jogoEmEdicao = computed(() =>
     this.jogos().find((jogo) => jogo.id === this.editorJogoId()) ?? null
   );
@@ -690,7 +706,7 @@ export class JogosPageComponent implements OnInit {
       partes.push(`data ${filtro.data}`);
     }
 
-    return partes.join(' • ');
+    return partes.join(' - ');
   }
 
   tituloCadastroDependencias(): string {
