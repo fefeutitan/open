@@ -3,6 +3,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import {
+  UiDependencyLinkItem,
+  UiDependencyLinksComponent
+} from '../../shared/ui-dependency-links/ui-dependency-links.component';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
@@ -22,6 +26,7 @@ import {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    UiDependencyLinksComponent,
     UiFeedbackComponent,
     UiEmptyStateComponent,
     UiPageHeaderComponent,
@@ -90,6 +95,23 @@ export class FasesPageComponent implements OnInit {
     const fase = this.faseGruposSelecionada();
     return !fase || fase.classificadosPorGrupo == null || fase.classificadosPorGrupo < 1 || this.gruposCadastrados() === 0;
   });
+  readonly linksMataMataBloqueado = computed<UiDependencyLinkItem[]>(() => {
+    const items: UiDependencyLinkItem[] = [];
+
+    if (this.fasesDeGrupos().length === 0 || this.fasesEliminatoriasDisponiveis().length === 0) {
+      items.push({ label: 'Criar fases necessarias', href: '#nova-fase' });
+    }
+    if (this.gruposCadastrados() === 0 && this.fasesDeGrupos().length > 0) {
+      items.push({ label: 'Cadastrar grupos', href: '#novo-grupo' });
+    }
+
+    return items;
+  });
+  readonly linksGrupoBloqueado = computed<UiDependencyLinkItem[]>(() =>
+    this.cadastroGrupoBloqueado()
+      ? [{ label: 'Criar fase de grupos', href: '#nova-fase' }]
+      : []
+  );
 
   readonly faseForm = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(120)]],

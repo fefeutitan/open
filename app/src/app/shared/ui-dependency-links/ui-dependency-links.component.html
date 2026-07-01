@@ -1,0 +1,11 @@
+@if (items().length > 0) {
+  <div class="dependency-links">
+    @for (item of items(); track item.label) {
+      @if (item.routerLink) {
+        <a [routerLink]="item.routerLink">{{ item.label }}</a>
+      } @else if (item.href) {
+        <a [href]="item.href">{{ item.label }}</a>
+      }
+    }
+  </div>
+}

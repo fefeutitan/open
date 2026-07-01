@@ -1,10 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
+import {
+  UiDependencyLinkItem,
+  UiDependencyLinksComponent
+} from '../../shared/ui-dependency-links/ui-dependency-links.component';
 import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
 import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Atleta, CadastroApiService, CategoriaResumo, JuizResumo } from '../atletas/cadastro-api.service';
@@ -25,9 +29,9 @@ type EditorOperacao = 'RESULTADO' | 'SUMULA' | 'CORRECAO_RESULTADO' | 'CORRECAO_
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     UiFeedbackComponent,
     UiEmptyStateComponent,
+    UiDependencyLinksComponent,
     UiPageHeaderComponent,
     UiStatGridComponent
   ],
@@ -192,6 +196,26 @@ export class JogosPageComponent implements OnInit {
   readonly faltamJuizes = computed(() => this.juizes().length < 3);
   readonly cadastroBloqueado = computed(() =>
     this.faltamFases() || this.faltamCategorias() || this.faltamAtletas()
+  );
+  readonly linksCadastroBloqueado = computed<UiDependencyLinkItem[]>(() => {
+    const items: UiDependencyLinkItem[] = [];
+
+    if (this.faltamFases()) {
+      items.push({ label: 'Configurar fases', routerLink: ['/campeonatos', this.campeonatoId()!, 'fases'] });
+    }
+    if (this.faltamCategorias()) {
+      items.push({ label: 'Cadastrar categorias', routerLink: ['/campeonatos', this.campeonatoId()!, 'categorias'] });
+    }
+    if (this.faltamAtletas()) {
+      items.push({ label: 'Cadastrar atletas', routerLink: ['/campeonatos', this.campeonatoId()!, 'atletas'] });
+    }
+
+    return items;
+  });
+  readonly linksSumulaBloqueada = computed<UiDependencyLinkItem[]>(() =>
+    this.faltamJuizes()
+      ? [{ label: 'Cadastrar juizes', routerLink: ['/campeonatos', this.campeonatoId()!, 'juizes'] }]
+      : []
   );
 
   ngOnInit(): void {

@@ -1,8 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import {
+  UiDependencyLinkItem,
+  UiDependencyLinksComponent
+} from '../../shared/ui-dependency-links/ui-dependency-links.component';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
@@ -16,7 +20,7 @@ import { Atleta, CadastroApiService, CategoriaResumo, NucleoResumo } from './cad
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
+    UiDependencyLinksComponent,
     UiFeedbackComponent,
     UiEmptyStateComponent,
     UiPageHeaderComponent,
@@ -50,6 +54,18 @@ export class AtletasPageComponent implements OnInit {
     { label: 'Ativos', value: this.atletasAtivos() },
     { label: 'Dependencias', value: `${this.categorias().length} categorias / ${this.nucleos().length} nucleos` }
   ]);
+  readonly linksFormularioBloqueado = computed<UiDependencyLinkItem[]>(() => {
+    const items: UiDependencyLinkItem[] = [];
+
+    if (this.faltamCategorias()) {
+      items.push({ label: 'Cadastrar categorias', routerLink: ['/campeonatos', this.campeonatoId()!, 'categorias'] });
+    }
+    if (this.faltamNucleos()) {
+      items.push({ label: 'Cadastrar nucleos', routerLink: ['/campeonatos', this.campeonatoId()!, 'nucleos'] });
+    }
+
+    return items;
+  });
 
   readonly form = this.formBuilder.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(120)]],

@@ -81,14 +81,7 @@
           title="Cadastro de atleta bloqueado"
           message="Preencha primeiro as dependencias deste campeonato para liberar o formulario."
         >
-          <div class="dependency-links">
-            @if (faltamCategorias()) {
-              <a [routerLink]="['/campeonatos', campeonatoId(), 'categorias']">Cadastrar categorias</a>
-            }
-            @if (faltamNucleos()) {
-              <a [routerLink]="['/campeonatos', campeonatoId(), 'nucleos']">Cadastrar nucleos</a>
-            }
-          </div>
+          <app-ui-dependency-links [items]="linksFormularioBloqueado()" />
         </app-ui-feedback>
       }
 

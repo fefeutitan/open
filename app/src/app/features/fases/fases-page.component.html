@@ -196,14 +196,7 @@
           title="Geracao de mata-mata bloqueada"
           [message]="descricaoBloqueioMataMata()"
         >
-          <div class="dependency-links">
-            @if (fasesDeGrupos().length === 0 || fasesEliminatoriasDisponiveis().length === 0) {
-              <a href="#nova-fase">Criar fases necessarias</a>
-            }
-            @if (gruposCadastrados() === 0 && fasesDeGrupos().length > 0) {
-              <a href="#novo-grupo">Cadastrar grupos</a>
-            }
-          </div>
+          <app-ui-dependency-links [items]="linksMataMataBloqueado()" />
         </app-ui-feedback>
       }
 
@@ -290,9 +283,7 @@
           title="Cadastro de grupo bloqueado"
           [message]="descricaoBloqueioGrupo()"
         >
-          <div class="dependency-links">
-            <a href="#nova-fase">Criar fase de grupos</a>
-          </div>
+          <app-ui-dependency-links [items]="linksGrupoBloqueado()" />
         </app-ui-feedback>
       }
 

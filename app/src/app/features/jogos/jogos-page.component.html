@@ -188,17 +188,7 @@
           title="Cadastro de jogo bloqueado"
           [message]="tituloCadastroDependencias()"
         >
-          <div class="dependency-links">
-            @if (faltamFases()) {
-              <a [routerLink]="['/campeonatos', campeonatoId(), 'fases']">Configurar fases</a>
-            }
-            @if (faltamCategorias()) {
-              <a [routerLink]="['/campeonatos', campeonatoId(), 'categorias']">Cadastrar categorias</a>
-            }
-            @if (faltamAtletas()) {
-              <a [routerLink]="['/campeonatos', campeonatoId(), 'atletas']">Cadastrar atletas</a>
-            }
-          </div>
+          <app-ui-dependency-links [items]="linksCadastroBloqueado()" />
         </app-ui-feedback>
       } @else if (!podeCadastrarJogos()) {
         <app-ui-feedback tone="warning" [inline]="true" [message]="tituloCadastroDependencias()" />
@@ -369,9 +359,7 @@
                 title="Sumula bloqueada"
                 [message]="tituloBloqueioSumula()"
               >
-                <div class="dependency-links">
-                  <a [routerLink]="['/campeonatos', campeonatoId(), 'juizes']">Cadastrar juizes</a>
-                </div>
+                <app-ui-dependency-links [items]="linksSumulaBloqueada()" />
               </app-ui-feedback>
             } @else {
               <form [formGroup]="sumulaForm" (ngSubmit)="modoCorrecao() ? corrigirSumula() : salvarSumula()" class="form-grid">

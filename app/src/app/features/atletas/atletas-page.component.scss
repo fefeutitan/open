@@ -148,23 +148,6 @@ select:focus {
   margin-top: 18px;
 }
 
-.dependency-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.dependency-links a {
-  color: inherit;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.dependency-links a:hover {
-  text-decoration: underline;
-}
-
 .field-error {
   margin: -4px 0 0;
   font-size: 0.9rem;
