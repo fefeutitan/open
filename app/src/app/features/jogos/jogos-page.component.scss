@@ -1,4 +1,3 @@
-.panel-header,
 .list-item-header {
   display: flex;
   align-items: start;
@@ -7,13 +6,12 @@
 }
 
 .page-copy,
-.panel-header span,
 .meta-grid dt,
 .list-item-header p,
 .hint,
 .helper,
 .summary-list p,
-.sidebar-note p {
+.note-card p {
   color: #64748b;
 }
 
@@ -110,7 +108,6 @@
 
 .list-item,
 .summary-list article,
-.sidebar-note,
 .judge-card {
   border: 1px solid #d9e0ea;
   border-radius: 8px;
@@ -127,8 +124,6 @@
 .summary-list article,
 .summary-list strong,
 .summary-list p,
-.sidebar-note strong,
-.sidebar-note p,
 .judge-card h3 {
   margin: 0;
 }
@@ -157,10 +152,6 @@
 
 .sidebar-panel {
   align-content: start;
-}
-
-.sidebar-note {
-  margin-top: 18px;
 }
 
 .editor-panel {
@@ -269,7 +260,6 @@ button[disabled] {
 }
 
 @media (max-width: 900px) {
-  .panel-header,
   .list-item-header,
   .row-actions,
   .action-cluster {

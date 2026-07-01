@@ -1,5 +1,4 @@
-.page-header,
-.panel-header {
+.page-header {
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -19,7 +18,6 @@
 }
 
 .page-copy,
-.panel-header span,
 .panel-label,
 .details-grid dt,
 .next-list p {
@@ -154,8 +152,7 @@
 }
 
 @media (max-width: 900px) {
-  .page-header,
-  .panel-header {
+  .page-header {
     align-items: stretch;
     flex-direction: column;
   }

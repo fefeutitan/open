@@ -3,7 +3,9 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
+import { UiNoteCardComponent } from '../../shared/ui-note-card/ui-note-card.component';
 import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
+import { UiSectionHeaderComponent } from '../../shared/ui-section-header/ui-section-header.component';
 import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import { JogoItem, JogosApiService } from '../jogos/jogos-api.service';
@@ -16,7 +18,9 @@ import { JogoItem, JogosApiService } from '../jogos/jogos-api.service';
     RouterLink,
     UiFeedbackComponent,
     UiEmptyStateComponent,
+    UiNoteCardComponent,
     UiPageHeaderComponent,
+    UiSectionHeaderComponent,
     UiStatGridComponent
   ],
   templateUrl: './painel-page.component.html',

@@ -10,6 +10,7 @@ import {
 import { UiEmptyStateComponent } from '../../shared/ui-empty-state/ui-empty-state.component';
 import { UiFeedbackComponent } from '../../shared/ui-feedback/ui-feedback.component';
 import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
+import { UiSectionHeaderComponent } from '../../shared/ui-section-header/ui-section-header.component';
 import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
 import {
@@ -30,6 +31,7 @@ import {
     UiFeedbackComponent,
     UiEmptyStateComponent,
     UiPageHeaderComponent,
+    UiSectionHeaderComponent,
     UiStatGridComponent
   ],
   templateUrl: './fases-page.component.html',

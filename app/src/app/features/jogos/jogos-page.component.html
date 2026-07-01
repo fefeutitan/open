@@ -22,15 +22,14 @@
 
   <section class="content-grid">
     <article class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Fila de jogos</h2>
-          <span>{{ jogosFiltrados().length }} item(ns) em {{ resumoFiltros() }}</span>
-        </div>
+      <app-ui-section-header
+        title="Fila de jogos"
+        [subtitle]="jogosFiltrados().length + ' item(ns) em ' + resumoFiltros()"
+      >
         <button type="button" class="secondary-button" (click)="atualizar()" [disabled]="refreshing()">
           {{ refreshing() ? 'Atualizando...' : 'Atualizar' }}
         </button>
-      </div>
+      </app-ui-section-header>
 
       <div class="filter-bar" aria-label="Filtro por status">
         <button type="button" class="filter-button" [class.active]="statusFiltro() === 'TODOS'" (click)="definirFiltro('TODOS')">Todos</button>
@@ -174,12 +173,7 @@
     </article>
 
     <article class="panel sidebar-panel">
-      <div class="panel-header">
-        <div>
-          <h2>Novo jogo</h2>
-          <span>POST /api/competicao/jogos</span>
-        </div>
-      </div>
+      <app-ui-section-header title="Novo jogo" subtitle="POST /api/competicao/jogos" />
 
       @if (cadastroBloqueado()) {
         <app-ui-feedback
@@ -279,12 +273,7 @@
 
       <div class="separator"></div>
 
-      <div class="panel-header">
-        <div>
-          <h2>Status operacional</h2>
-          <span>Base para resultado, sumula e correcoes</span>
-        </div>
-      </div>
+      <app-ui-section-header title="Status operacional" subtitle="Base para resultado, sumula e correcoes" />
 
       <div class="summary-list">
         <article>
@@ -301,8 +290,7 @@
         </article>
       </div>
 
-      <div class="sidebar-note">
-        <strong>Endpoint ativo</strong>
+      <app-ui-note-card title="Endpoint ativo">
         <p>GET /api/competicao/jogos?campeonatoId=...</p>
         <p>POST /api/competicao/jogos</p>
         <p>PATCH /api/competicao/jogos/:id/iniciar</p>
@@ -310,17 +298,16 @@
         <p>PUT /api/competicao/jogos/:id/sumula</p>
         <p>POST /api/competicao/jogos/:id/correcoes/resultado</p>
         <p>POST /api/competicao/jogos/:id/correcoes/sumula</p>
-      </div>
+      </app-ui-note-card>
 
       @if (jogoEmEdicao(); as jogo) {
         <div class="editor-panel">
-          <div class="panel-header">
-            <div>
-              <h2>{{ tituloEditor() }}</h2>
-              <span>{{ jogo.atletaVermelho.nome }} x {{ jogo.atletaAzul.nome }}</span>
-            </div>
+          <app-ui-section-header
+            [title]="tituloEditor()"
+            [subtitle]="jogo.atletaVermelho.nome + ' x ' + jogo.atletaAzul.nome"
+          >
             <button type="button" class="secondary-button" (click)="fecharEditor()">Fechar</button>
-          </div>
+          </app-ui-section-header>
 
           @if (modoCorrecao()) {
             <form [formGroup]="correcaoForm" class="form-grid">

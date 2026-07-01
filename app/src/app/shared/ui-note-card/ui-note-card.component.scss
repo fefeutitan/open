@@ -1,0 +1,19 @@
+.note-card {
+  background: #ffffff;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.note-card strong,
+.note-card p {
+  margin: 0;
+}
+
+.note-body {
+  color: #64748b;
+  display: grid;
+  gap: 6px;
+}

@@ -1,0 +1,12 @@
+<div class="section-header" [class.compact]="compact()" [attr.id]="anchorId()">
+  <div class="section-copy">
+    <h2>{{ title() }}</h2>
+    @if (subtitle()) {
+      <span>{{ subtitle() }}</span>
+    }
+  </div>
+
+  <div class="section-actions">
+    <ng-content></ng-content>
+  </div>
+</div>

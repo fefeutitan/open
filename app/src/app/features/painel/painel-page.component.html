@@ -49,15 +49,11 @@
 
 <section class="content-grid">
   <article class="panel">
-    <div class="panel-header">
-      <div>
-        <h2>Fila de jogos</h2>
-        <span>GET /api/competicao/jogos?campeonatoId=...</span>
-      </div>
+    <app-ui-section-header title="Fila de jogos" subtitle="GET /api/competicao/jogos?campeonatoId=...">
       <button type="button" class="secondary-button" (click)="atualizarJogos()" [disabled]="loadingJogos()">
         {{ loadingJogos() ? 'Atualizando...' : 'Atualizar jogos' }}
       </button>
-    </div>
+    </app-ui-section-header>
 
     @if (loadingCampeonatos() || loadingJogos()) {
       <app-ui-empty-state title="Carregando fila operacional..." />
@@ -111,21 +107,18 @@
   </article>
 
   <article class="panel compact">
-    <div class="panel-header">
-      <h2>Acoes rapidas</h2>
-    </div>
+    <app-ui-section-header title="Acoes rapidas" />
 
     <a class="quick-link" [routerLink]="rotaJogos()">Operar jogos</a>
     <a class="quick-link" [routerLink]="rotaFases()">Fases e grupos</a>
     <a class="quick-link" [routerLink]="rotaDetalhe()">Abrir campeonato</a>
     <a class="quick-link" routerLink="/campeonatos">Todos os campeonatos</a>
 
-    <div class="side-note">
-      <strong>Leitura do painel</strong>
+    <app-ui-note-card title="Leitura do painel">
       <p>
         Desempates pendentes agora sao carregados pelo endpoint dedicado
         <code>/api/competicao/jogos/desempates-pendentes</code>.
       </p>
-    </div>
+    </app-ui-note-card>
   </article>
 </section>

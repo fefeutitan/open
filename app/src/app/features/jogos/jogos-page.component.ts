@@ -10,6 +10,8 @@ import {
   UiDependencyLinksComponent
 } from '../../shared/ui-dependency-links/ui-dependency-links.component';
 import { UiPageHeaderComponent } from '../../shared/ui-page-header/ui-page-header.component';
+import { UiNoteCardComponent } from '../../shared/ui-note-card/ui-note-card.component';
+import { UiSectionHeaderComponent } from '../../shared/ui-section-header/ui-section-header.component';
 import { UiStatGridComponent, UiStatItem } from '../../shared/ui-stat-grid/ui-stat-grid.component';
 import { Atleta, CadastroApiService, CategoriaResumo, JuizResumo } from '../atletas/cadastro-api.service';
 import { Campeonato, CampeonatoApiService } from '../campeonatos/campeonato-api.service';
@@ -32,7 +34,9 @@ type EditorOperacao = 'RESULTADO' | 'SUMULA' | 'CORRECAO_RESULTADO' | 'CORRECAO_
     UiFeedbackComponent,
     UiEmptyStateComponent,
     UiDependencyLinksComponent,
+    UiNoteCardComponent,
     UiPageHeaderComponent,
+    UiSectionHeaderComponent,
     UiStatGridComponent
   ],
   templateUrl: './jogos-page.component.html',

@@ -1,0 +1,34 @@
+.section-header {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.section-copy {
+  min-width: 0;
+}
+
+.section-copy h2,
+.section-copy span {
+  margin: 0;
+}
+
+.section-copy span {
+  color: #64748b;
+}
+
+.section-actions:empty {
+  display: none;
+}
+
+.compact .section-copy h2 {
+  font-size: 1.05rem;
+}
+
+@media (max-width: 900px) {
+  .section-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

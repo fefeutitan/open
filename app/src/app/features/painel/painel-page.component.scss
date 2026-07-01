@@ -1,4 +1,3 @@
-.panel-header,
 .queue-header,
 .filters-panel {
   align-items: start;
@@ -8,11 +7,10 @@
 }
 
 .page-copy,
-.panel-header span,
 .meta-grid dt,
 .queue-header p,
 .championship-context span,
-.side-note p {
+.note-card p {
   color: #64748b;
 }
 
@@ -95,10 +93,6 @@ button,
   gap: 12px;
 }
 
-.panel-header {
-  margin-bottom: 18px;
-}
-
 .empty-state {
   border: 1px dashed #cbd5e1;
   border-radius: 8px;
@@ -130,9 +124,7 @@ button,
 .queue-header p,
 .meta-grid,
 .meta-grid dt,
-.meta-grid dd,
-.side-note strong,
-.side-note p {
+.meta-grid dd {
   margin: 0;
 }
 
@@ -184,7 +176,6 @@ button[disabled] {
 }
 
 @media (max-width: 900px) {
-  .panel-header,
   .queue-header,
   .filters-panel {
     align-items: stretch;

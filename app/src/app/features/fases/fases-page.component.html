@@ -22,12 +22,10 @@
 
   <section class="content-grid">
     <article class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Estrutura atual</h2>
-          <span>{{ totalFases() }} fase(s) cadastrada(s)</span>
-        </div>
-      </div>
+      <app-ui-section-header
+        title="Estrutura atual"
+        [subtitle]="totalFases() + ' fase(s) cadastrada(s)'"
+      />
 
       @if (fases().length === 0) {
         <app-ui-empty-state
@@ -140,12 +138,7 @@
     </article>
 
     <article class="panel stack-panel">
-      <div class="panel-header" id="nova-fase">
-        <div>
-          <h2>Nova fase</h2>
-          <span>POST /api/competicao/fases</span>
-        </div>
-      </div>
+      <app-ui-section-header anchorId="nova-fase" title="Nova fase" subtitle="POST /api/competicao/fases" />
 
       <form [formGroup]="faseForm" (ngSubmit)="salvarFase()" class="form-grid">
         <label class="full-width">
@@ -182,12 +175,10 @@
 
       <div class="separator"></div>
 
-      <div class="panel-header">
-        <div>
-          <h2>Gerar mata-mata</h2>
-          <span>POST /api/competicao/fases/{{ '{' }}faseGruposId{{ '}' }}/gerar-mata-mata</span>
-        </div>
-      </div>
+      <app-ui-section-header
+        title="Gerar mata-mata"
+        subtitle="POST /api/competicao/fases/{faseGruposId}/gerar-mata-mata"
+      />
 
       @if (mataMataBloqueado()) {
         <app-ui-feedback
@@ -248,12 +239,11 @@
 
         @if (jogosGerados().length > 0) {
           <div class="generated-block">
-            <div class="panel-header compact-header">
-              <div>
-                <h3>Confrontos gerados</h3>
-                <span>{{ jogosGerados().length }} jogo(s) criado(s)</span>
-              </div>
-            </div>
+            <app-ui-section-header
+              [compact]="true"
+              title="Confrontos gerados"
+              [subtitle]="jogosGerados().length + ' jogo(s) criado(s)'"
+            />
 
             <div class="list compact-list">
               @for (jogo of jogosGerados(); track trackByJogoGerado($index, jogo)) {
@@ -269,12 +259,7 @@
 
       <div class="separator"></div>
 
-      <div class="panel-header" id="novo-grupo">
-        <div>
-          <h2>Novo grupo</h2>
-          <span>POST /api/competicao/grupos</span>
-        </div>
-      </div>
+      <app-ui-section-header anchorId="novo-grupo" title="Novo grupo" subtitle="POST /api/competicao/grupos" />
 
       @if (cadastroGrupoBloqueado()) {
         <app-ui-feedback
